@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/stylesheets/style.css">
   <script src="/scripts/freet.js"></script>
   <script src="/scripts/user.js"></script>
+  <script src="/scripts/like.js"></script>
   <script src="/scripts/index.js"></script>
 </head>
 
@@ -117,6 +118,34 @@
           </div>
           <input type="submit" value="Delete Freet">
         </form>
+
+        <form id="add-like">
+          <h3>Like Freet</h3>
+          <div>
+            <label for="freetId">Freet ID:</label>
+            <input id="freetId" name="freetId"></input>
+          </div>
+          <input type="submit" value="Like Freet">
+        </form>
+
+        <form id="remove-like">
+          <h3>Unlike Freet</h3>
+          <div>
+            <label for="freetId">Freet ID:</label>
+            <input id="freetId" name="freetId"></input>
+          </div>
+          <input type="submit" value="Unlike Freet">
+        </form>
+
+        <form id="view-like-count-by-freet">
+          <h3>View Like Count</h3>
+          <div>
+            <label for="freetId">Freet ID:</label>
+            <input id="freetId" name="freetId"></input>
+          </div>
+          <input type="submit" value="View Like Count">
+        </form>
+
       </div>
     </section>
     <section>
