@@ -313,3 +313,208 @@ This renders the `index.html` file that will be used to interact with the backen
 **Throws**
 
 - `403` if the user is not logged in
+
+#### `GET /api/feed/timeline` - Get the timeline feed
+
+**Returns**
+
+- An array of the most recent freets sorted by like count
+
+**Throws**
+
+- `403` if the user is not logged in
+
+#### `GET /api/feed/following` - Get the user's following feed
+
+**Returns**
+
+- An array of the freets posted by users that the current user is following, sorted in descending order by date modified
+
+**Throws**
+
+-  `403` if the user is not logged in
+
+#### `POST /api/follows` - Follow a user
+
+**Body**
+-  `userId` - the id of the user being followed
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `409` if the user already follows the other user
+- `404` if the id of the user being followed doesn't exist
+
+#### `DELETE /api/follows/:userId?` - Unfollow a user
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the id of the user being followed doesn't exist or the follow doesn't exist
+
+#### `GET /api/follows?followee=userId` - Get all the followers of a user
+
+**Returns**
+
+- An array of all the users who follow the given user
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the given id doesn't exist
+
+#### `GET /api/follows?follower=userId` - Get all the users that a user follows
+
+**Returns**
+
+- An array of all the users that the given user follows
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the given id doesn't exist
+
+#### `POST /api/likes` - Like a freet
+
+**Body**
+-  `freetId` - the id of the freet being liked
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `409` if the user has already liked the freet
+- `404` if the id of the freet doesn't exist
+
+#### `DELETE /api/likes` - Unlike a freet
+
+**Body**
+-  `freetId` - the id of the freet being unliked
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the id of the freet doesn't exist or the user hasn't liked the freet
+
+#### `GET /api/likes?freetId=id` - Get the like count of a freet
+
+**Returns**
+
+- An integer representing the freet's like count
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the freet id doesn't exist
+- `400` if the freet id isn't given
+
+#### `POST /api/reports` - Report a freet
+
+**Body**
+-  `freetId` - the id of the freet being reported
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `409` if the user has already reported the freet
+- `404` if the id of the freet doesn't exist
+
+#### `GET /api/reports?freetId=id` - Get the report count of a freet
+
+**Returns**
+
+- An integer representing the freet's report count
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the freet id doesn't exist
+- `400` if the freet id isn't given
+
+#### `POST /api/circles` - Create a circle
+
+**Body**
+-  `name` - the name of the circle
+-  `usernames` - the usernames of users in the circle
+
+**Returns**
+
+- An object with the newly created circle
+
+**Throws**
+
+- `403` if the user is not logged in
+- `409` if the user already has a circle with that name
+- `404` if the id of any of the users in the circle doesn't exist
+
+#### `DELETE /api/circles/:circleId` - Delete a circle
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the circle doesn't exist
+
+#### `PUT /api/circles` - Update a circle's settings
+
+**Body** _(no need to add fields that are not being changed)_
+
+- `name` _{string}_ - the name of the circle
+- `usernames` _{string}_ - the usernames of users in the circle
+
+**Returns**
+
+- A success message
+- An object with the updated circle details
+
+**Throws**
+
+- `403` if the user is not logged in
+- `409` if the user already has a circle with the new name
+- `404` if the id of any of the users in the circle doesn't exist
+
+#### `GET /api/circles` - Get all of a user's circles
+
+**Returns**
+
+- An array containing the user's circles
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the user id doesn't exist
+- `400` if the user id isn't given
+
+#### `GET /api/circles?circle=circleId` - Get the details for a circle
+
+**Returns**
+
+- An object containing the circle details
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the circle id doesn't exist
+- `400` if the circle id isn't given

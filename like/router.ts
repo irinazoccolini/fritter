@@ -39,6 +39,7 @@ router.get(
  * @return {string} - a success message
  * @throws {403} - the user is not logged in
  * @throws {404} - the freet id is invalid
+ * @throws {409} - the like already exists
  */
 router.post(
     '/',
