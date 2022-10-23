@@ -42,6 +42,12 @@ const formsAndHandlers = {
   'add-like': addLike,
   'remove-like': removeLike,
   'view-like-count-by-freet': viewLikeCountByFreet,
+  'reply-to-freet': replyToFreet,
+  'view-replies-to-freet': viewRepliesToFreet,
+  'reply-to-reply': replyToReply,
+  'view-replies-to-reply': viewRepliesToReply,
+  'edit-reply': editReply,
+  'delete-reply': deleteReply,
 };
 
 // Attach handlers to forms

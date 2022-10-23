@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/stylesheets/style.css">
   <script src="/scripts/freet.js"></script>
+  <script src="/scripts/reply.js"></script>
   <script src="/scripts/user.js"></script>
   <script src="/scripts/like.js"></script>
   <script src="/scripts/index.js"></script>
@@ -117,6 +118,80 @@
             <input id="id" name="id">
           </div>
           <input type="submit" value="Delete Freet">
+        </form>
+
+        <form id="reply-to-freet">
+          <h3>Reply to Freet</h3>
+          <div>
+            <label for="id">Freet ID:</label>
+            <input id="id" name="id">
+          </div>
+          <div>
+            <label for="anonymous">Anonymous (true or false):</label>
+            <input id="anonymous" name="anonymous">
+          </div>
+          <div>
+            <label for="content">Content:</label>
+            <textarea id="content" name="content"></textarea>
+          </div>
+          <input type="submit" value="Reply To Freet">
+        </form>
+
+        <form id="view-replies-to-freet">
+          <h3>View Replies to Freet:</h3>
+          <div>
+            <label for="id">Freet ID:</label>
+            <input id="id" name="id">
+          </div>
+          <input type="submit" value="View Replies To Freet">
+        </form>
+
+        <form id="reply-to-reply">
+          <h3>Reply to Reply</h3>
+          <div>
+            <label for="id">Reply ID:</label>
+            <input id="id" name="id">
+          </div>
+          <div>
+            <label for="anonymous">Anonymous (true or false):</label>
+            <input id="anonymous" name="anonymous">
+          </div>
+          <div>
+            <label for="content">Content:</label>
+            <textarea id="content" name="content"></textarea>
+          </div>
+          <input type="submit" value="Reply To Reply">
+        </form>
+
+        <form id="view-replies-to-reply">
+          <h3>View Replies to Reply:</h3>
+          <div>
+            <label for="id">Reply ID:</label>
+            <input id="id" name="id">
+          </div>
+          <input type="submit" value="View Replies To Reply">
+        </form>
+
+        <form id="edit-reply">
+          <h3>Edit Reply</h3>
+          <div>
+            <label for="id">ID:</label>
+            <input id="id" name="id">
+          </div>
+          <div>
+            <label for="content">Content:</label>
+            <textarea id="content" name="content"></textarea>
+          </div>
+          <input type="submit" value="Edit Reply">
+        </form>
+
+        <form id="delete-reply">
+          <h3>Delete Reply</h3>
+          <div>
+            <label for="id">ID:</label>
+            <input id="id" name="id">
+          </div>
+          <input type="submit" value="Delete Reply">
         </form>
 
         <form id="add-like">

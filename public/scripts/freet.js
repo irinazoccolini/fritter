@@ -34,3 +34,20 @@ function deleteFreet(fields) {
     .then(showResponse)
     .catch(showResponse);
 }
+
+function replyToFreet(fields){
+  if (fields.anonymous == "false"){
+    fields.anonymous = false;
+  } else if (fields.anonymous == "true"){
+    fields.anonymous = true;
+  }
+  fetch(`/api/freets/${fields.id}/replies`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  .then(showResponse)
+  .catch(showResponse);
+}
+
+function viewRepliesToFreet(fields){
+  fetch(`/api/freets/${fields.id}/replies`)
+  .then(showResponse)
+  .catch(showResponse);
+}

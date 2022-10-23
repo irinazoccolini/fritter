@@ -4,6 +4,8 @@ import FreetCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
 import * as util from './util';
+import * as replyUtil from '../reply/util';
+import ReplyCollection from '../reply/collection';
 
 const router = express.Router();
 
@@ -130,5 +132,56 @@ router.put(
     });
   }
 );
+
+/**
+ * Get all replies to a freet
+ * 
+ * @name GET /api/freets/:id/replies
+ * 
+ * @return {ReplyResponse[]} - a list of all the replies to the freet
+ * @throws {404} - If the freetId is not valid
+ * @throws {403} - If the user is not logged in
+ */
+router.get(
+  "/:freetId?/replies",
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists,
+  ],
+  async (req: Request, res: Response) => {
+    const replies = await ReplyCollection.findAllByParentFreet(req.params.freetId);
+    const response = replies.map(replyUtil.constructReplyResponse);
+    res.status(200).json(response);
+  }
+)
+
+/**
+ * Post a reply to a freet
+ * 
+ * @name POST /api/freets/:id/replies
+ * 
+ * @param {string} content - the content of the reply
+ * @param {boolean} anonymous - whether the reply is anonymous
+ * 
+ * @return {ReplyResponse} - the newly created reply
+ * @throws {403} - If the user is not logged in
+ * @throws {404} - If the freetId is not valid
+ */
+router.post(
+  "/:freetId?/replies",
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists,
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const reply = await ReplyCollection.addReplyToFreet(userId, req.params.freetId, req.body.anonymous, req.body.content);
+
+    res.status(201).json({
+      message: 'Your reply was created successfully.',
+      reply: replyUtil.constructReplyResponse(reply)
+    });
+  }
+)
 
 export {router as freetRouter};

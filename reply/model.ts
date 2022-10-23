@@ -1,0 +1,62 @@
+import {Types, PopulatedDoc, Document} from 'mongoose';
+import {Schema, model} from 'mongoose';
+import type {User} from '../user/model';
+
+export type Reply = {
+    _id: Types.ObjectId;
+    authorId: Types.ObjectId;
+    parentFreet: Types.ObjectId;
+    parentReply: Types.ObjectId;
+    content: string;
+    dateCreated: Date;
+    dateModified: Date;
+    anonymous: Boolean;
+};
+
+export type PopulatedReply = {
+    _id: Types.ObjectId;
+    authorId: User;
+    parentFreet: Types.ObjectId;
+    parentReply: Types.ObjectId;
+    content: string;
+    dateCreated: Date;
+    dateModified: Date;
+    anonymous: Boolean;
+};
+
+const ReplySchema = new Schema<Reply>({
+    authorId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "User"
+    },
+    parentFreet: {
+        type: Schema.Types.ObjectId,
+        required: false,
+        ref: "Freet"
+    },
+    parentReply: {
+        type: Schema.Types.ObjectId,
+        required: false,
+        ref: "Reply"
+    },
+    content: {
+        type: String,
+        required: true
+    },
+    dateCreated: {
+        type: Date,
+        required: true
+    },
+    dateModified: {
+        type: Date,
+        required: true
+    },
+    anonymous: {
+        type: Boolean,
+        required: true
+    }
+});
+
+const ReplyModel = model<Reply>("Reply", ReplySchema);
+export default ReplyModel;
