@@ -8,7 +8,6 @@
   <script src="/scripts/freet.js"></script>
   <script src="/scripts/reply.js"></script>
   <script src="/scripts/user.js"></script>
-  <script src="/scripts/like.js"></script>
   <script src="/scripts/index.js"></script>
 </head>
 
@@ -194,31 +193,58 @@
           <input type="submit" value="Delete Reply">
         </form>
 
-        <form id="add-like">
+        <form id="add-freet-like">
           <h3>Like Freet</h3>
           <div>
-            <label for="freetId">Freet ID:</label>
-            <input id="freetId" name="freetId"></input>
+            <label for="id">Freet ID:</label>
+            <input id="id" name="id"></input>
           </div>
           <input type="submit" value="Like Freet">
         </form>
 
-        <form id="remove-like">
+        <form id="remove-freet-like">
           <h3>Unlike Freet</h3>
           <div>
-            <label for="freetId">Freet ID:</label>
-            <input id="freetId" name="freetId"></input>
+            <label for="id">Freet ID:</label>
+            <input id="id" name="id"></input>
           </div>
           <input type="submit" value="Unlike Freet">
         </form>
 
         <form id="view-like-count-by-freet">
-          <h3>View Like Count</h3>
+          <h3>View Freet Like Count</h3>
           <div>
-            <label for="freetId">Freet ID:</label>
-            <input id="freetId" name="freetId"></input>
+            <label for="id">Freet ID:</label>
+            <input id="id" name="id"></input>
           </div>
-          <input type="submit" value="View Like Count">
+          <input type="submit" value="View Freet Like Count">
+        </form>
+
+        <form id="add-reply-like">
+          <h3>Like Reply</h3>
+          <div>
+            <label for="id">Reply ID:</label>
+            <input id="id" name="id"></input>
+          </div>
+          <input type="submit" value="Like Reply">
+        </form>
+
+        <form id="remove-reply-like">
+          <h3>Unlike Reply</h3>
+          <div>
+            <label for="id">Reply ID:</label>
+            <input id="id" name="id"></input>
+          </div>
+          <input type="submit" value="Unlike Reply">
+        </form>
+
+        <form id="view-like-count-by-reply">
+          <h3>View Reply Like Count</h3>
+          <div>
+            <label for="id">Reply ID:</label>
+            <input id="id" name="id"></input>
+          </div>
+          <input type="submit" value="View Reply Like Count">
         </form>
 
       </div>

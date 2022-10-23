@@ -26,3 +26,21 @@ function deleteReply(fields){
   .then(showResponse)
   .catch(showResponse);
 }
+
+function addReplyLike(fields){
+  fetch(`/api/replies/${fields.id}/likes`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  .then(showResponse)
+  .catch(showResponse);
+}
+
+function removeReplyLike(fields){
+  fetch(`/api/replies/${fields.id}/likes`, {method: 'DELETE'})
+  .then(showResponse)
+  .catch(showResponse);
+}
+
+function viewLikeCountByReply(fields){
+  fetch(`/api/replies/${fields.id}/likes`)
+  .then(showResponse)
+  .catch(showResponse);
+}

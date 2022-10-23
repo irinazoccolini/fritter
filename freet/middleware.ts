@@ -41,7 +41,7 @@ const isFreetExists = async (req: Request, res: Response, next: NextFunction) =>
 /**
  * Checks if a freet with freetId in req.query exists
  */
- const isFreetExistsQuery = async (req: Request, res: Response, next: NextFunction) => {
+ const isFreetExistsInQuery = async (req: Request, res: Response, next: NextFunction) => {
   if (!req.query.freetId) {
     res.status(400).json({
       error: 'Provided freet ID must be nonempty.'
@@ -107,5 +107,5 @@ export {
   isFreetExists,
   isValidFreetModifier,
   isFreetExistsBody,
-  isFreetExistsQuery
+  isFreetExistsInQuery
 };

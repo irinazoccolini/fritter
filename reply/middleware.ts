@@ -35,9 +35,35 @@ const isReplyExists = async (req: Request, res: Response, next: NextFunction) =>
 
   next();
 };
+
+
+/**
+ * Checks if a reply with replyId in req.query exists
+ */
+ const isReplyExistsInQuery = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.query.replyId) {
+    res.status(400).json({
+      error: 'Provided reply ID must be nonempty.'
+    });
+    return;
+  }
+  const validFormat = Types.ObjectId.isValid(req.query.replyId as string);
+  const reply = validFormat ? await ReplyCollection.findOneById(req.query.replyId as string) : '';
+  if (!reply) {
+    res.status(404).json({
+      error: {
+        replyNotFound: `Reply with reply ID ${req.query.replyId} does not exist.`
+      }
+    });
+    return;
+  }
+
+  next();
+};
   
 
 export {
     isReplyExists,
-    isValidReplyModifier
+    isValidReplyModifier,
+    isReplyExistsInQuery
 };

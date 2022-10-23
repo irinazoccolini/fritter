@@ -51,3 +51,21 @@ function viewRepliesToFreet(fields){
   .then(showResponse)
   .catch(showResponse);
 }
+
+function addFreetLike(fields){
+  fetch(`/api/freets/${fields.id}/likes`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  .then(showResponse)
+  .catch(showResponse);
+}
+
+function removeFreetLike(fields){
+  fetch(`/api/freets/${fields.id}/likes`, {method: 'DELETE'})
+  .then(showResponse)
+  .catch(showResponse);
+}
+
+function viewLikeCountByFreet(fields){
+  fetch(`/api/freets/${fields.id}/likes`)
+  .then(showResponse)
+  .catch(showResponse);
+}

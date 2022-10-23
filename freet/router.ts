@@ -3,9 +3,11 @@ import express from 'express';
 import FreetCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
+import * as likeValidator from "../like/middleware";
 import * as util from './util';
 import * as replyUtil from '../reply/util';
 import ReplyCollection from '../reply/collection';
+import LikeCollection from '../like/collection';
 
 const router = express.Router();
 
@@ -183,5 +185,81 @@ router.post(
     });
   }
 )
+
+/**
+ * Like a freet
+ * 
+ * @name POST /api/freets/:id/likes
+ * 
+ * @return {Like} - the newly created like
+ * @throws {403} - If the user is not logged in
+ * @throws {404} - If the freet doesn't exist
+ * @throws {409} - the like already exists
+ */
+router.post(
+  '/:freetId?/likes',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists,
+    likeValidator.isFreetLikeNotExists
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const like = await LikeCollection.addFreetLike(userId, req.params.freetId);
+    res.status(201).json({
+        message: 'Your like was added successfully.',
+        like: like
+      });
+  }
+);
+
+/**
+ * Unlike a freet
+ * 
+ * @name DELETE /api/freets/:id/likes
+ * 
+ * @return {string} - a success message
+ * @throws {403} - If the user is not logged in
+ * @throws {404} - If the freet doesn't exists or if the user hasn't like the freet previously
+ */
+router.delete(
+  '/:freetId?/likes',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists,
+    likeValidator.isFreetLikeExists
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const like = await LikeCollection.deleteFreetLike(userId, req.params.freetId);
+    res.status(201).json({
+        message: 'Your like was deleted successfully.'
+      });
+  }
+);
+
+/**
+ * Get all likes for a freet
+ * 
+ * @name GET /api/freets/:id/likes
+ * 
+ * @return {Like[]} - an array of likes for the freet
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the freet doesn't exists
+ */
+router.get(
+  '/:freetId?/likes',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists
+  ],
+  async (req: Request, res: Response) => {
+    const freetLikes = await LikeCollection.findAllByFreet(req.params.freetId as string);
+      res.status(200).json({
+      message: `Freet ${req.params.freetId} has ${freetLikes.length} likes.`,
+      likes: freetLikes
+    });
+  }
+);
 
 export {router as freetRouter};

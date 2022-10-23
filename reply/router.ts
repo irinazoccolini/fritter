@@ -3,7 +3,9 @@ import express from 'express';
 import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
 import * as replyValidator from "../reply/middleware";
+import * as likeValidator from "../like/middleware";
 import ReplyCollection from '../reply/collection';
+import LikeCollection from '../like/collection';
 import * as util from './util';
 
 const router = express.Router();
@@ -110,5 +112,82 @@ router.put(
         });
     }
 );
+
+
+/**
+ * Like a reply.
+ * 
+ * @name POST /api/replies/:id/likes
+ * 
+ * @return {Like} - the newly created like
+ * @throws {403} - If the user is not logged in
+ * @throws {404} - If the reply doesn't exist
+ * @throws {409} - the like already exists
+ */
+router.post(
+    '/:replyId?/likes',
+    [
+        userValidator.isUserLoggedIn,
+        replyValidator.isReplyExists,
+        likeValidator.isReplyLikeNotExists
+    ],
+    async (req: Request, res: Response) => {
+        const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+        const like = await LikeCollection.addReplyLike(userId, req.params.replyId);
+        res.status(201).json({
+            message: 'Your like was added successfully.',
+            like: like
+        });
+    }
+);
+
+/**
+ * Unlike a reply
+ * 
+ * @name DELETE /api/replies/:id/likes
+ * 
+ * @return {string} - a success message
+ * @throws {403} - If the user is not logged in
+ * @throws {404} - If the reply doesn't exists or if the user hasn't liked the reply previously
+ */
+router.delete(
+    '/:replyId?/likes',
+    [
+        userValidator.isUserLoggedIn,
+        replyValidator.isReplyExists,
+        likeValidator.isReplyLikeExists
+    ],
+    async (req: Request, res: Response) => {
+        const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+        const like = await LikeCollection.deleteReplyLike(userId, req.params.replyId);
+        res.status(201).json({
+            message: 'Your like was deleted successfully.'
+        });
+    }
+)
+
+/**
+ * Get all likes for a reply
+ * 
+ * @name GET /api/replies/:id/likes
+ * 
+ * @return {Like[]} - an array of likes for the reply
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the reply doesn't exists
+ */
+router.get(
+    '/:replyId?/likes',
+    [
+        userValidator.isUserLoggedIn,
+        replyValidator.isReplyExists
+    ],
+    async (req: Request, res: Response) => {
+        const replyLikes = await LikeCollection.findAllByReply(req.params.replyId as string);
+        res.status(200).json({
+        message: `Reply ${req.params.replyId} has ${replyLikes.length} likes.`,
+        likes: replyLikes
+        });
+    }
+)
 
 export {router as replyRouter}

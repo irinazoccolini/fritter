@@ -11,7 +11,6 @@ import dotenv from 'dotenv';
 import * as userValidator from '../user/middleware';
 import {userRouter} from '../user/router';
 import {freetRouter} from '../freet/router';
-import {likeRouter} from '../like/router';
 import {replyRouter} from '../reply/router';
 
 // Load environmental variables
@@ -78,7 +77,6 @@ app.get('/', (req: Request, res: Response) => {
 // Add routers from routes folder
 app.use('/api/users', userRouter);
 app.use('/api/freets', freetRouter);
-app.use('/api/likes', likeRouter);
 app.use('/api/replies', replyRouter);
 
 
