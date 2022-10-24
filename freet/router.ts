@@ -4,10 +4,12 @@ import FreetCollection from './collection';
 import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
 import * as likeValidator from "../like/middleware";
+import * as reportValidator from "../report/middleware";
 import * as util from './util';
 import * as replyUtil from '../reply/util';
 import ReplyCollection from '../reply/collection';
 import LikeCollection from '../like/collection';
+import ReportCollection from '../report/collection';
 
 const router = express.Router();
 
@@ -259,6 +261,61 @@ router.get(
       message: `Freet ${req.params.freetId} has ${freetLikes.length} likes.`,
       likes: freetLikes
     });
+  }
+);
+
+/**
+ * Get all reports for a freet
+ * 
+ * @name GET /api/freets/:id/reports
+ * 
+ * @return {Report[]} - an array of reports for the freet
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the freet doesn't exists
+ */
+ router.get(
+  '/:freetId?/reports',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists
+  ],
+  async (req: Request, res: Response) => {
+    const freetReports = await ReportCollection.findAllByFreet(req.params.freetId as string);
+      res.status(200).json({
+      message: `Freet ${req.params.freetId} has ${freetReports.length} reports.`,
+      reports: freetReports
+    });
+  }
+);
+
+/**
+ * Report a freet
+ * 
+ * @name POST /api/freets/:id/reports
+ * 
+ * @return {Report} - the newly created report
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the freet doesn't exist
+ * @throws {409} - if the report already exists
+ */
+router.post(
+  '/:freetId?/reports',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists,
+    reportValidator.isReplyReportNotExists
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const report = await ReportCollection.addFreetReport(userId, req.params.freetId);
+    const allReports = await ReportCollection.findAllByFreet(req.params.freetId);
+    if (allReports.length >= 10){
+      await FreetCollection.deleteOne(req.params.freetId);
+    }
+    res.status(201).json({
+        message: 'Your report was added successfully.',
+        report: report
+      });
   }
 );
 

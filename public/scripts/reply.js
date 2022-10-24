@@ -44,3 +44,15 @@ function viewLikeCountByReply(fields){
   .then(showResponse)
   .catch(showResponse);
 }
+
+function reportReply(fields){
+  fetch(`/api/replies/${fields.id}/reports`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  .then(showResponse)
+  .catch(showResponse);
+}
+
+function viewReportCountByReply(fields){
+  fetch(`/api/replies/${fields.id}/reports`)
+  .then(showResponse)
+  .catch(showResponse);
+}

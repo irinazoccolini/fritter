@@ -69,3 +69,15 @@ function viewLikeCountByFreet(fields){
   .then(showResponse)
   .catch(showResponse);
 }
+
+function reportFreet(fields){
+  fetch(`/api/freets/${fields.id}/reports`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  .then(showResponse)
+  .catch(showResponse);
+}
+
+function viewReportCountByFreet(fields){
+  fetch(`/api/freets/${fields.id}/reports`)
+  .then(showResponse)
+  .catch(showResponse);
+}

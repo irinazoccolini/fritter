@@ -4,8 +4,10 @@ import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
 import * as replyValidator from "../reply/middleware";
 import * as likeValidator from "../like/middleware";
+import * as reportValidator from "../report/middleware";
 import ReplyCollection from '../reply/collection';
 import LikeCollection from '../like/collection';
+import ReportCollection from '../report/collection';
 import * as util from './util';
 
 const router = express.Router();
@@ -189,5 +191,60 @@ router.get(
         });
     }
 )
+
+/**
+ * Get all reports for a reply
+ * 
+ * @name GET /api/replies/:id/reports
+ * 
+ * @return {Report[]} - an array of reports for the reply
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the reply doesn't exists
+ */
+router.get(
+    '/:replyId?/reports',
+    [
+      userValidator.isUserLoggedIn,
+      replyValidator.isReplyExists
+    ],
+    async (req: Request, res: Response) => {
+      const replyReports = await ReportCollection.findAllByReply(req.params.replyId as string);
+        res.status(200).json({
+        message: `Reply ${req.params.replyId} has ${replyReports.length} reports.`,
+        reports: replyReports
+      });
+    }
+);
+  
+/**
+ * Report a reply
+ * 
+ * @name POST /api/replies/:id/reports
+ * 
+ * @return {Report} - the newly created report
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the reply doesn't exist
+ * @throws {409} - if the report already exists
+ */
+router.post(
+    '/:replyId?/reports',
+    [
+        userValidator.isUserLoggedIn,
+        replyValidator.isReplyExists,
+        reportValidator.isReplyReportNotExists
+    ],
+    async (req: Request, res: Response) => {
+        const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+        const report = await ReportCollection.addReplyReport(userId, req.params.replyId);
+        const allReports = await ReportCollection.findAllByReply(req.params.replyId);
+        if (allReports.length >= 3){
+            await ReplyCollection.deleteOne(req.params.replyId);
+        }
+        res.status(201).json({
+            message: 'Your report was added successfully.',
+            report: report
+        });
+    }
+);
 
 export {router as replyRouter}

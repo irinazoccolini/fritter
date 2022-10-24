@@ -50,7 +50,11 @@ const formsAndHandlers = {
   'view-like-count-by-freet': viewLikeCountByFreet,
   'add-reply-like': addReplyLike,
   'remove-reply-like': removeReplyLike,
-  'view-like-count-by-reply': viewLikeCountByReply
+  'view-like-count-by-reply': viewLikeCountByReply,
+  'view-report-count-by-freet': viewReportCountByFreet,
+  'report-freet': reportFreet,
+  'view-report-count-by-reply': viewReportCountByReply,
+  'report-reply': reportReply,
 };
 
 // Attach handlers to forms
