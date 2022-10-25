@@ -2,6 +2,7 @@ import {Types, PopulatedDoc, Document} from 'mongoose';
 import {Schema, model} from 'mongoose';
 import type {User} from '../user/model';
 import type {Freet} from '../freet/model';
+import { Circle } from '../circle/model';
 
 export type Reply = {
     _id: Types.ObjectId;
@@ -12,7 +13,8 @@ export type Reply = {
     dateCreated: Date;
     dateModified: Date;
     anonymous: Boolean;
-    deleted: Boolean;
+    circle: Types.ObjectId;
+    private: Boolean;
 };
 
 export type PopulatedReply = {
@@ -24,7 +26,8 @@ export type PopulatedReply = {
     dateCreated: Date;
     dateModified: Date;
     anonymous: Boolean;
-    deleted: Boolean;
+    circle: Circle;
+    private: Boolean;
 };
 
 const ReplySchema = new Schema<Reply>({
@@ -59,7 +62,12 @@ const ReplySchema = new Schema<Reply>({
         type: Boolean,
         required: true
     },
-    deleted: {
+    circle: {
+        type: Schema.Types.ObjectId,
+        required: false,
+        ref: "Circle"
+    },
+    private: {
         type: Boolean,
         required: true
     }

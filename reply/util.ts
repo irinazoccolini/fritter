@@ -11,9 +11,10 @@ type ReplyResponse = {
   dateCreated: string;
   dateModified: string;
   anonymous: Boolean;
-  deleted: Boolean;
   parentFreet: string;
   parentReply: string;
+  circle: string;
+  private: Boolean
 };
 
 /**
@@ -38,17 +39,19 @@ const constructReplyResponse = (reply: HydratedDocument<Reply>): ReplyResponse =
     })
   };
 
-  const {username} = replyCopy.authorId;
-  delete replyCopy.authorId;
+  const usernameDisplay = replyCopy.authorId ? replyCopy.authorId.username : undefined;
+
   return {
     ...replyCopy,
     _id: replyCopy._id.toString(),
-    author: replyCopy.anonymous ? "Anonymous" : username,
+    author: replyCopy.anonymous ? "Anonymous" : usernameDisplay,
     parentFreet: replyCopy.parentFreet ? replyCopy.parentFreet._id.toString() : undefined,
     parentReply: replyCopy.parentReply ? replyCopy.parentReply._id.toString() : undefined,
     dateCreated: formatDate(replyCopy.dateCreated),
     dateModified: formatDate(replyCopy.dateModified),
-    anonymous: replyCopy.anonymous
+    anonymous: replyCopy.anonymous,
+    circle: replyCopy.circle ? replyCopy.circle.name : "everyone",
+    private: replyCopy.private
   };
 };
 

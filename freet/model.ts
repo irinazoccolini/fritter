@@ -17,7 +17,7 @@ export type Freet = {
   dateModified: Date;
   circle: Types.ObjectId;
   anonymous: boolean;
-  deleted: boolean;
+  private: boolean;
 };
 
 export type PopulatedFreet = {
@@ -28,7 +28,7 @@ export type PopulatedFreet = {
   dateModified: Date;
   circle: Circle;
   anonymous: boolean;
-  deleted: boolean;
+  private: boolean;
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -68,9 +68,9 @@ const FreetSchema = new Schema<Freet>({
     type: Boolean,
     required: true
   },
-  // Whether the freet has been designated as deleted
-  deleted: {
-    type: Boolean, 
+  // Whether the freet is private (only visible to the author)
+  private: {
+    type: Boolean,
     required: true
   }
 });

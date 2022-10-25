@@ -11,7 +11,7 @@ type FreetResponse = {
   dateModified: string;
   circle: string;
   anonymous: boolean;
-  deleted: boolean;
+  private: boolean;
 };
 
 /**
@@ -35,18 +35,17 @@ const constructFreetResponse = (freet: HydratedDocument<Freet>): FreetResponse =
       versionKey: false // Cosmetics; prevents returning of __v property
     })
   };
-  const {username} = freetCopy.authorId;
-  delete freetCopy.authorId;
+  const usernameDisplay = freetCopy.authorId ? freetCopy.authorId.username : undefined;
 
   return {
     ...freetCopy,
     _id: freetCopy._id.toString(),
-    author: freet.anonymous ? "Anonymous" : username,
+    author: freet.anonymous ? "Anonymous" : usernameDisplay,
     dateCreated: formatDate(freet.dateCreated),
     dateModified: formatDate(freet.dateModified),
     circle: freetCopy.circle ? freetCopy.circle.name : "everyone",
-    anonymous: freet.anonymous,
-    deleted: freet.deleted
+    anonymous: freetCopy.anonymous,
+    private: freetCopy.private
   };
 };
 

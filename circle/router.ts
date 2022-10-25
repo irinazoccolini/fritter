@@ -141,7 +141,7 @@ router.delete(
     ],
     async (req: Request, res: Response) => {
         await CircleCollection.deleteOne(req.params.circleId);
-        await FreetCollection.deleteManyByCircle(req.params.circleId); // delete all the freets that were posted to this circle
+        await FreetCollection.privateManyByCircle(req.params.circleId); // delete all the freets that were posted to this circle
         res.status(200).json({
             message: "Your circle was successfully deleted."
         });

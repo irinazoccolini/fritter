@@ -13,7 +13,7 @@ class ReplyCollection {
      * @return {Promise<HydratedDocument<Reply>>} - The newly created reply
      */
     static async addReplyToFreet(authorId: Types.ObjectId | string, freetId: Types.ObjectId | string, 
-                        anonymous: boolean, content: string): Promise<HydratedDocument<Reply>>{
+                        anonymous: boolean, content: string, circle: Types.ObjectId | string | undefined): Promise<HydratedDocument<Reply>>{
         const date = new Date()
         const reply = new ReplyModel({
             authorId: authorId,
@@ -22,10 +22,11 @@ class ReplyCollection {
             dateCreated: date,
             dateModified: date,
             anonymous: anonymous,
-            deleted: false
+            circle: circle ? circle : undefined,
+            private: false
         });
         await reply.save(); // Saves reply to MongoDB
-        return reply.populate(['authorId', 'parentFreet']);
+        return reply.populate(['authorId', 'parentFreet', 'circle']);
     }
 
     /**
@@ -38,7 +39,7 @@ class ReplyCollection {
      * @return {Promise<HydratedDocument<Reply>>} - The newly created reply
      */
     static async addReplyToReply(authorId: Types.ObjectId | string, replyId: Types.ObjectId | string, 
-        anonymous: boolean, content: string): Promise<HydratedDocument<Reply>>{
+        anonymous: boolean, content: string, circle: Types.ObjectId | string | undefined): Promise<HydratedDocument<Reply>>{
         const date = new Date()
         const reply = new ReplyModel({
         authorId: authorId,
@@ -47,10 +48,11 @@ class ReplyCollection {
         dateCreated: date,
         dateModified: date,
         anonymous: anonymous,
-        deleted: false
+        circle: circle ? circle : undefined,
+        private: false
         });
         await reply.save(); // Saves reply to MongoDB
-        return reply.populate(['authorId', 'parentReply']);
+        return reply.populate(['authorId', 'parentReply', 'circle']);
     }
 
     /**
@@ -59,11 +61,7 @@ class ReplyCollection {
      * @param {string} replyId - the id of the reply to delete
      */
     static async deleteOne(replyId: Types.ObjectId | string): Promise<void>{
-        const reply = await ReplyModel.findOne({_id: replyId});
-        reply.deleted = true;
-        reply.dateModified = new Date();
-        await reply.save();
-        return reply.populate(["authorId", "parentFreet", "parentReply"]);
+        await ReplyModel.deleteOne({_id:replyId});
     }
 
     /**
@@ -112,7 +110,7 @@ class ReplyCollection {
      * @param {string} authorId - the id of the author
      */
     static async deleteManyByAuthor(authorId: Types.ObjectId | string): Promise<void>{
-        await ReplyModel.updateMany({authorId: authorId}, {deleted: true, dateModified: new Date()});
+        await ReplyModel.deleteMany({authorId: authorId});
     }
 
     /**
@@ -129,6 +127,16 @@ class ReplyCollection {
         await reply.save();
         return reply.populate(["authorId", "parentFreet", "parentReply"]);
     }
+
+    /**
+     * Private replies by circle
+     * 
+     * @param {string} circleId - the id of the circle
+     */
+    static async privateManyByCircle(circleId: Types.ObjectId | string): Promise<void> {
+        await ReplyModel.updateMany({circle: circleId}, {private: true});
+    }
+
 }
 
 export default ReplyCollection;

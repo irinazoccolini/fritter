@@ -8,6 +8,7 @@ import * as reportValidator from "../report/middleware";
 import ReplyCollection from '../reply/collection';
 import LikeCollection from '../like/collection';
 import ReportCollection from '../report/collection';
+import CircleCollection from '../circle/collection';
 import * as util from './util';
 import * as likeUtil from '../like/util';
 
@@ -19,7 +20,7 @@ const router = express.Router();
  * @name GET /api/replies/:id/replies
  * 
  * @return {ReplyResponse[]} - a list of all the replies to the freet
- * @throws {404} - If the freetId is not valid
+ * @throws {404} - If the replyId is not valid
  * @throws {403} - If the user is not logged in
  */
  router.get(
@@ -33,8 +34,32 @@ const router = express.Router();
       const response = replies.map(util.constructReplyResponse);
       res.status(200).json(response);
     }
-  )
-  
+)
+
+/**
+ * Get a reply from its id
+ * 
+ * @name GET /api/replies/:id
+ * 
+ * @return {ReplyResponse} - the reply
+ * @throws {404} - if the reply id is not valid
+ * @throws {403} - if the user is not logged in
+ */
+router.get(
+    "/:replyId?",
+    [
+        userValidator.isUserLoggedIn,
+        replyValidator.isReplyExists
+    ],
+    async (req: Request, res: Response) => {
+        const reply = await ReplyCollection.findOneById(req.params.replyId);
+        res.status(200).json({
+            message: "Reply retrieved successfully",
+            reply: util.constructReplyResponse(reply)
+        });
+    }
+);
+
 /**
  * Post a reply to a reply
  * 
@@ -52,16 +77,28 @@ router.post(
     [
         userValidator.isUserLoggedIn,
         replyValidator.isReplyExists,
+        replyValidator.isValidReplyViewer,
         replyValidator.isValidReplyContent
     ],
     async (req: Request, res: Response) => {
         const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-        const reply = await ReplyCollection.addReplyToReply(userId, req.params.replyId, req.body.anonymous, req.body.content);
-
-        res.status(201).json({
-        message: 'Your reply was created successfully.',
-        reply: util.constructReplyResponse(reply)
-        });
+        const reply = await ReplyCollection.findOneById(req.params.replyId);
+        const circle = reply.circle ? await CircleCollection.findOneById(reply.circle._id) : undefined;
+        if (circle) {
+          const reply = await ReplyCollection.addReplyToReply(userId, req.params.freetId, req.body.anonymous, req.body.content, circle._id);
+          res.status(201).json({
+            message: 'Your reply was created successfully.',
+            reply: util.constructReplyResponse(reply)
+          });
+        } else {
+          const reply = await ReplyCollection.addReplyToReply(userId, req.params.freetId, req.body.anonymous, req.body.content, undefined);
+    
+          res.status(201).json({
+            message: 'Your reply was created successfully.',
+            reply: util.constructReplyResponse(reply)
+          });
+        }
+    
     }
 )
 
@@ -79,10 +116,6 @@ router.post(
  */
 router.patch(
     '/:replyId?',
-    async (req: Request, res: Response, next: NextFunction) => {
-        if (req.body.content) next(); // change content
-        else next('route'); // delete reply
-      },
     [
         userValidator.isUserLoggedIn,
         replyValidator.isReplyExists,
@@ -108,7 +141,7 @@ router.patch(
  *                 the reply
  * @throws {404} - If the replyId is not valid
  */
-router.patch(
+router.delete(
     '/:replyId?',
     [
         userValidator.isUserLoggedIn,

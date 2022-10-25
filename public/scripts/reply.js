@@ -17,7 +17,7 @@ function editReply(fields){
 }
 
 function deleteReply(fields){
-  fetch(`/api/replies/${fields.id}`, {method: "PATCH", body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  fetch(`/api/replies/${fields.id}`, {method: "DELETE"})
   .then(showResponse)
   .catch(showResponse);
 }
@@ -50,4 +50,10 @@ function viewReportCountByReply(fields){
   fetch(`/api/replies/${fields.id}/reports`)
   .then(showResponse)
   .catch(showResponse);
+}
+
+function viewReplyById(fields){
+  fetch(`/api/replies/${fields.id}`)
+  .then(showResponse)
+  .catch(showResponse)
 }

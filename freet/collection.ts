@@ -29,9 +29,9 @@ class FreetCollection {
         dateCreated: date,
         content,
         dateModified: date,
-        deleted: false,
         circle: circle,
-        anonymous: anonymous
+        anonymous: anonymous,
+        private: false
       });
       await freet.save(); // Saves freet to MongoDB
       return freet.populate(['authorId', 'circle']);
@@ -41,8 +41,8 @@ class FreetCollection {
         dateCreated: date,
         content,
         dateModified: date,
-        deleted: false,
-        anonymous: anonymous
+        anonymous: anonymous,
+        private: false
       });
       await freet.save(); // Saves freet to MongoDB
       return freet.populate(['authorId', 'circle']);
@@ -101,12 +101,8 @@ class FreetCollection {
    * @param {string} freetId - The freetId of freet to delete
    * @return {Promise<Boolean>} - true if the freet has been deleted, false otherwise
    */
-  static async deleteOne(freetId: Types.ObjectId | string): Promise<boolean> {
-    const freet = await FreetModel.findOne({_id: freetId});
-    freet.deleted = true;
-    freet.dateModified = new Date();
-    await freet.save();
-    return freet.populate(['authorId', 'circle']);
+  static async deleteOne(freetId: Types.ObjectId | string): Promise<void> {
+    await FreetModel.deleteOne({_id: freetId});
   }
 
   /**
@@ -115,16 +111,7 @@ class FreetCollection {
    * @param {string} authorId - The id of author of freets
    */
   static async deleteManyByAuthor(authorId: Types.ObjectId | string): Promise<void> {
-    await FreetModel.updateMany({authorId: authorId}, {deleted: true, dateModified: new Date()});
-  }
-
-  /**
-   * Delete all the freets in a given circle
-   * 
-   * @param {string} circleId - The id of the circle 
-   */
-  static async deleteManyByCircle(circleId: Types.ObjectId | string): Promise<void>{
-    await FreetModel.updateMany({circle: circleId}, {deleted: true, dateModified: new Date()});
+    await FreetModel.deleteMany({authorId: authorId});
   }
 
   /**
@@ -135,6 +122,15 @@ class FreetCollection {
    */
   static async findManyByCircle(circleId: Types.ObjectId | string): Promise<Array<HydratedDocument<Freet>>>{
     return FreetModel.find({circle: circleId}).populate(["circle", "authorId"]);
+  }
+
+  /** 
+   * Private freets for a given circle
+   * 
+   * @param {string} circleId - the id of the circle
+   */
+  static async privateManyByCircle(circleId: Types.ObjectId | string): Promise<void>{
+    await FreetModel.updateMany({circle:circleId}, {private: true, dateModified: new Date()});
   }
 }
 

@@ -78,3 +78,9 @@ function viewReportCountByFreet(fields){
   .then(showResponse)
   .catch(showResponse);
 }
+
+function viewFreetById(fields){
+  fetch(`/api/freets/${fields.id}`)
+  .then(showResponse)
+  .catch(showResponse)
+}

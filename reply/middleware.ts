@@ -1,6 +1,7 @@
 import type {Request, Response, NextFunction} from 'express';
 import {Types} from 'mongoose';
 import ReplyCollection from './collection';
+import CircleCollection from '../circle/collection';
 
 /**
  * Checks if a reply with replyId in req.params exists
@@ -8,7 +9,7 @@ import ReplyCollection from './collection';
 const isReplyExists = async (req: Request, res: Response, next: NextFunction) => {
   const validFormat = Types.ObjectId.isValid(req.params.replyId as string);
   const reply = validFormat ? await ReplyCollection.findOneById(req.params.replyId as string) : '';
-  if (!reply || reply.deleted) {
+  if (!reply) {
     res.status(404).json({
       error: {
         replyNotFound: `Reply with reply ID ${req.params.replyId} does not exist.`
@@ -87,11 +88,31 @@ const isReplyExists = async (req: Request, res: Response, next: NextFunction) =>
   next();
 };
 
+/**
+ * Check that a user can view the freet.
+ */
+ const isValidReplyViewer = async (req: Request, res: Response, next: NextFunction) => {
+  const reply = await ReplyCollection.findOneById(req.params.replyId);
+  const authorId = reply.authorId._id.toString();
+  const circle = reply.circle ? (await CircleCollection.findOneById(reply.circle._id)) : undefined
+  const circleMembers = circle ? circle.members : []
+  const circleMemberIds = new Set(circleMembers.map(member => member._id.toString()));
+  const circleOwner = circle ? circle.creatorId._id : undefined;
+  if ((reply.private && req.session.userId !== authorId) || 
+      (reply.circle && ((!circleMemberIds.has(req.session.userId)) && circleOwner.toString() !== req.session.userId))) {
+    res.status(403).json({
+      error: "You do not have access to view this freet."
+    });
+    return;
+  }
+  next();
+}
   
 
 export {
     isReplyExists,
     isValidReplyModifier,
     isReplyExistsInQuery,
-    isValidReplyContent
+    isValidReplyContent,
+    isValidReplyViewer
 };

@@ -14,6 +14,7 @@ import * as reportUtil from '../report/util';
 import ReplyCollection from '../reply/collection';
 import LikeCollection from '../like/collection';
 import ReportCollection from '../report/collection';
+import CircleCollection from '../circle/collection';
 
 const router = express.Router();
 
@@ -55,6 +56,31 @@ router.get(
     const authorFreets = await FreetCollection.findAllByUsername(req.query.author as string);
     const response = authorFreets.map(util.constructFreetResponse);
     res.status(200).json(response);
+  }
+);
+
+/**
+ * Get a freet from its id
+ * 
+ * @name GET /api/freets/:id
+ * 
+ * @return {FreetResponse} - the corresponding freet
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the freet doesn't exist
+ */
+router.get(
+  '/:freetId?',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists,
+    freetValidator.isValidFreetViewer
+  ],
+  async (req: Request, res: Response) => {
+    const freet = await FreetCollection.findOne(req.params.freetId);
+    res.status(200).json({
+      message: "Freet retrieved successfully",
+      freet: util.constructFreetResponse(freet)
+    });
   }
 );
 
@@ -185,16 +211,28 @@ router.post(
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
+    freetValidator.isValidFreetViewer,
     replyValidator.isValidReplyContent
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const reply = await ReplyCollection.addReplyToFreet(userId, req.params.freetId, req.body.anonymous, req.body.content);
+    const freet = await FreetCollection.findOne(req.params.freetId);
+    const circle = freet.circle ? await CircleCollection.findOneById(freet.circle._id) : undefined;
+    if (circle) {
+      const reply = await ReplyCollection.addReplyToFreet(userId, req.params.freetId, req.body.anonymous, req.body.content, circle._id);
+      res.status(201).json({
+        message: 'Your reply was created successfully.',
+        reply: replyUtil.constructReplyResponse(reply)
+      });
+    } else {
+      const reply = await ReplyCollection.addReplyToFreet(userId, req.params.freetId, req.body.anonymous, req.body.content, undefined);
 
-    res.status(201).json({
-      message: 'Your reply was created successfully.',
-      reply: replyUtil.constructReplyResponse(reply)
-    });
+      res.status(201).json({
+        message: 'Your reply was created successfully.',
+        reply: replyUtil.constructReplyResponse(reply)
+      });
+    }
+
   }
 )
 
@@ -213,6 +251,7 @@ router.post(
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
+    freetValidator.isValidFreetViewer,
     likeValidator.isFreetLikeNotExists
   ],
   async (req: Request, res: Response) => {
@@ -239,6 +278,7 @@ router.delete(
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
+    freetValidator.isValidFreetViewer,
     likeValidator.isFreetLikeExists
   ],
   async (req: Request, res: Response) => {
@@ -263,7 +303,8 @@ router.get(
   '/:freetId?/likes',
   [
     userValidator.isUserLoggedIn,
-    freetValidator.isFreetExists
+    freetValidator.isFreetExists,
+    freetValidator.isValidFreetViewer,
   ],
   async (req: Request, res: Response) => {
     const freetLikes = await LikeCollection.findAllByFreet(req.params.freetId as string);
@@ -288,7 +329,8 @@ router.get(
   '/:freetId?/reports',
   [
     userValidator.isUserLoggedIn,
-    freetValidator.isFreetExists
+    freetValidator.isFreetExists,
+    freetValidator.isValidFreetViewer,
   ],
   async (req: Request, res: Response) => {
     const freetReports = await ReportCollection.findAllByFreet(req.params.freetId as string);
@@ -315,6 +357,7 @@ router.post(
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
+    freetValidator.isValidFreetViewer,
     reportValidator.isReplyReportNotExists
   ],
   async (req: Request, res: Response) => {

@@ -110,7 +110,7 @@ const isCircleInBodyOwner = async (req: Request, res: Response, next: NextFuncti
         const userId = circle.creatorId._id;
         if (req.session.userId !== userId.toString()) {
             res.status(403).json({
-                error: "Can't post to other users' circles."
+                error: "Can't post freets to other users' circles."
             });
             return;
         }

@@ -1,3 +1,4 @@
+import CircleCollection from '../circle/collection';
 import type {Request, Response, NextFunction} from 'express';
 import {Types} from 'mongoose';
 import FreetCollection from '../freet/collection';
@@ -8,7 +9,7 @@ import FreetCollection from '../freet/collection';
 const isFreetExists = async (req: Request, res: Response, next: NextFunction) => {
   const validFormat = Types.ObjectId.isValid(req.params.freetId);
   const freet = validFormat ? await FreetCollection.findOne(req.params.freetId) : '';
-  if (!freet || freet.deleted) {
+  if (!freet) {
     res.status(404).json({
       error: {
         freetNotFound: `Freet with freet ID ${req.params.freetId} does not exist.`
@@ -50,7 +51,7 @@ const isFreetExists = async (req: Request, res: Response, next: NextFunction) =>
   }
   const validFormat = Types.ObjectId.isValid(req.query.freetId as string);
   const freet = validFormat ? await FreetCollection.findOne(req.query.freetId as string) : '';
-  if (!freet || freet.deleted) {
+  if (!freet) {
     res.status(404).json({
       error: {
         freetNotFound: `Freet with freet ID ${req.query.freetId} does not exist.`
@@ -102,10 +103,31 @@ const isValidFreetModifier = async (req: Request, res: Response, next: NextFunct
   next();
 };
 
+/**
+ * Check that a user can view the freet.
+ */
+const isValidFreetViewer = async (req: Request, res: Response, next: NextFunction) => {
+  const freet = await FreetCollection.findOne(req.params.freetId);
+  const authorId = freet.authorId._id.toString();
+  const circle = freet.circle ? (await CircleCollection.findOneById(freet.circle._id)) : undefined
+  const circleMembers = circle ? circle.members : []
+  const circleMemberIds = new Set(circleMembers.map(member => member._id.toString()));
+  const circleOwner = circle ? circle.creatorId._id : undefined;
+  if ((freet.private && req.session.userId !== authorId) || 
+      (freet.circle && ((!circleMemberIds.has(req.session.userId)) && circleOwner.toString() !== req.session.userId))) {
+    res.status(403).json({
+      error: "You do not have access to view this freet."
+    });
+    return;
+  }
+  next();
+}
+
 export {
   isValidFreetContent,
   isFreetExists,
   isValidFreetModifier,
   isFreetExistsBody,
-  isFreetExistsInQuery
+  isFreetExistsInQuery,
+  isValidFreetViewer
 };
