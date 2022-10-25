@@ -55,12 +55,20 @@ const formsAndHandlers = {
   'report-freet': reportFreet,
   'view-report-count-by-reply': viewReportCountByReply,
   'report-reply': reportReply,
+  'create-circle': createCircle,
+  'delete-circle': deleteCircle,
+  'view-freets-by-circle': viewFreetsByCircle,
+  'view-user-circles': viewUserCircles,
+  'modify-circle-name': modifyCircle,
+  'modify-circle-members': modifyCircle
 };
 
 // Attach handlers to forms
 function init() {
   Object.entries(formsAndHandlers).forEach(([formID, handler]) => {
+    console.log(formID)
     const form = document.getElementById(formID);
+    console.log(form)
     form.onsubmit = e => {
       e.preventDefault();
       const formData = new FormData(form);

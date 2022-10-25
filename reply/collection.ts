@@ -60,7 +60,6 @@ class ReplyCollection {
      * Delete a reply from the collection.
      * 
      * @param {string} replyId - the id of the reply to delete
-     * @return {Promise<Boolean>} - true if the reply has been deleted, false otherwise
      */
     static async deleteOne(replyId: Types.ObjectId | string): Promise<void>{
         const reply = await ReplyModel.deleteOne({_id: replyId});

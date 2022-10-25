@@ -8,6 +8,7 @@
   <script src="/scripts/freet.js"></script>
   <script src="/scripts/reply.js"></script>
   <script src="/scripts/user.js"></script>
+  <script src="/scripts/circle.js"></script>
   <script src="/scripts/index.js"></script>
 </head>
 
@@ -93,6 +94,14 @@
           <div>
             <label for="content">Content:</label>
             <textarea id="content" name="content"></textarea>
+          </div>
+          <div>
+            <label for="circleId">Circle Id (blank if freeting to everyone):</label>
+            <input id="circleId" name="circleId"></input>
+          </div>
+          <div>
+            <label for="anonymous">Anonymous (true or false):</label>
+            <input id="anonymous" name="anonymous"></input>
           </div>
           <input type="submit" value="Create Freet">
         </form>
@@ -281,6 +290,68 @@
             <input id="id" name="id"></input>
           </div>
           <input type="submit" value="View Reply Report Count">
+        </form>
+
+        <form id="create-circle">
+          <h3>Create Circle</h3>
+          <div>
+            <label for="name">Circle Name:</label>
+            <input id="name" name="name"></input>
+          </div>
+          <div>
+            <label for="usernames">Circle Members:</label>
+            <input id="usernames" name="usernames"></input>
+          </div>
+          <input type="submit" value="Create Circle">
+        </form>
+
+        <form id="delete-circle">
+          <h3>Delete Circle</h3>
+          <div>
+            <label for="id">Circle Id:</label>
+            <input id="id" name="id"></input>
+          </div>
+          <input type="submit" value="Delete Circle">
+        </form>
+
+        <form id="view-freets-by-circle">
+          <h3>View Freets By Circle</h3>
+          <div>
+            <label for="id">Circle Id:</label>
+            <input id="id" name="id"></input>
+          </div>
+          <input type="submit" value="View Freets By Circle">
+        </form>
+
+        <form id="view-user-circles">
+          <h3>View User Circles</h3>
+          <input type="submit" value="View User Circles">
+        </form>
+
+        <form id="modify-circle-name">
+          <h3>Modify Circle Name</h3>
+          <div>
+            <label for="id">Circle Id:</label>
+            <input id="id" name="id"></input>
+          </div>
+          <div>
+            <label for="name">New Circle Name:</label>
+            <input id="name" name="name"></input>
+          </div>
+          <input type="submit" value="Modify Circle Name">
+        </form>
+
+        <form id="modify-circle-members">
+          <h3>Modify Circle Members</h3>
+          <div>
+            <label for="id">Circle Id:</label>
+            <input id="id" name="id"></input>
+          </div>
+          <div>
+            <label for="usernames">New Circle Members:</label>
+            <input id="usernames" name="usernames"></input>
+          </div>
+          <input type="submit" value="Modify Circle Members">
         </form>
 
       </div>

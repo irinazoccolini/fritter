@@ -5,6 +5,7 @@ import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
 import * as likeValidator from "../like/middleware";
 import * as reportValidator from "../report/middleware";
+import * as circleValidator from "../circle/middleware";
 import * as util from './util';
 import * as replyUtil from '../reply/util';
 import ReplyCollection from '../reply/collection';
@@ -60,6 +61,8 @@ router.get(
  * @name POST /api/freets
  *
  * @param {string} content - The content of the freet
+ * @param {string} anonymous - Whether the freet is posted anonymously
+ * @param {string} circleId - The id of the circle that the freet is posted to, if any
  * @return {FreetResponse} - The created freet
  * @throws {403} - If the user is not logged in
  * @throws {400} - If the freet content is empty or a stream of empty spaces
@@ -69,12 +72,13 @@ router.post(
   '/',
   [
     userValidator.isUserLoggedIn,
-    freetValidator.isValidFreetContent
+    freetValidator.isValidFreetContent,
+    circleValidator.isCircleInBodyExists,
+    circleValidator.isCircleInBodyOwner
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const freet = await FreetCollection.addOne(userId, req.body.content);
-
+    const freet = await FreetCollection.addOne(userId, req.body.content, req.body.anonymous, req.body.circleId);
     res.status(201).json({
       message: 'Your freet was created successfully.',
       freet: util.constructFreetResponse(freet)
@@ -83,34 +87,9 @@ router.post(
 );
 
 /**
- * Delete a freet
- *
- * @name DELETE /api/freets/:id
- *
- * @return {string} - A success message
- * @throws {403} - If the user is not logged in or is not the author of
- *                 the freet
- * @throws {404} - If the freetId is not valid
- */
-router.delete(
-  '/:freetId?',
-  [
-    userValidator.isUserLoggedIn,
-    freetValidator.isFreetExists,
-    freetValidator.isValidFreetModifier
-  ],
-  async (req: Request, res: Response) => {
-    await FreetCollection.deleteOne(req.params.freetId);
-    res.status(200).json({
-      message: 'Your freet was deleted successfully.'
-    });
-  }
-);
-
-/**
  * Modify a freet
  *
- * @name PUT /api/freets/:id
+ * @name PATCH /api/freets/:id
  *
  * @param {string} content - the new content for the freet
  * @return {FreetResponse} - the updated freet
@@ -120,8 +99,12 @@ router.delete(
  * @throws {400} - If the freet content is empty or a stream of empty spaces
  * @throws {413} - If the freet content is more than 140 characters long
  */
-router.put(
+router.patch(
   '/:freetId?',
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.body.content) next();
+    else next('route');
+  },
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
@@ -133,6 +116,29 @@ router.put(
     res.status(200).json({
       message: 'Your freet was updated successfully.',
       freet: util.constructFreetResponse(freet)
+    });
+  }
+);
+
+/**
+ * Delete a freet
+ * 
+ * @name PATCH /api/freets/:id
+ * @throws {403} - if the user is not logged in or not the author of
+ *                 of the freet
+ * @throws {404} - If the freetId is not valid
+ */
+router.patch(
+  '/:freetId?',
+  [
+    userValidator.isUserLoggedIn,
+    freetValidator.isFreetExists,
+    freetValidator.isValidFreetModifier
+  ],
+  async (req: Request, res: Response) => {
+    await FreetCollection.deleteOne(req.params.freetId);
+    res.status(200).json({
+      message: 'Your freet was deleted successfully.'
     });
   }
 );

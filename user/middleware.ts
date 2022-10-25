@@ -153,6 +153,25 @@ const isAuthorExists = async (req: Request, res: Response, next: NextFunction) =
   next();
 };
 
+/**
+ * Checks if all the username in a list of usernames in req.body exist.
+ */
+const isUsersExist = async(req: Request, res: Response, next: NextFunction) => {
+  const usernames = req.body.usernames.split(",");
+  for (const username of usernames){
+    const user = await UserCollection.findOneByUsername(username);
+    if (!user){
+      res.status(400).json({
+        error: {
+          usernameNotExists: `The username ${username} provided as a member does not exist.`
+        }
+      });
+      return;
+    }
+  }
+  next();
+};
+
 export {
   isCurrentSessionUserExists,
   isUserLoggedIn,
@@ -161,5 +180,6 @@ export {
   isAccountExists,
   isAuthorExists,
   isValidUsername,
-  isValidPassword
+  isValidPassword,
+  isUsersExist
 };

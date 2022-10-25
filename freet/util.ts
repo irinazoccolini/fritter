@@ -9,6 +9,9 @@ type FreetResponse = {
   dateCreated: string;
   content: string;
   dateModified: string;
+  circle: string;
+  anonymous: boolean;
+  deleted: boolean;
 };
 
 /**
@@ -34,12 +37,16 @@ const constructFreetResponse = (freet: HydratedDocument<Freet>): FreetResponse =
   };
   const {username} = freetCopy.authorId;
   delete freetCopy.authorId;
+
   return {
     ...freetCopy,
     _id: freetCopy._id.toString(),
-    author: username,
+    author: freet.anonymous ? "Anonymous" : username,
     dateCreated: formatDate(freet.dateCreated),
-    dateModified: formatDate(freet.dateModified)
+    dateModified: formatDate(freet.dateModified),
+    circle: freetCopy.circle ? freetCopy.circle.name : "everyone",
+    anonymous: freet.anonymous,
+    deleted: freet.deleted
   };
 };
 

@@ -1,6 +1,7 @@
-import type {Types, PopulatedDoc, Document} from 'mongoose';
+import {Types, PopulatedDoc, Document} from 'mongoose';
 import {Schema, model} from 'mongoose';
 import type {User} from '../user/model';
+import type {Circle} from '../circle/model';
 
 /**
  * This file defines the properties stored in a Freet
@@ -14,6 +15,9 @@ export type Freet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
+  circle: Types.ObjectId;
+  anonymous: boolean;
+  deleted: boolean;
 };
 
 export type PopulatedFreet = {
@@ -22,6 +26,9 @@ export type PopulatedFreet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
+  circle: Circle;
+  anonymous: boolean;
+  deleted: boolean;
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -48,6 +55,22 @@ const FreetSchema = new Schema<Freet>({
   // The date the freet was modified
   dateModified: {
     type: Date,
+    required: true
+  },
+  // The circle, if any, that the freet was posted to
+  circle: {
+    type: Schema.Types.ObjectId,
+    required: false,
+    ref: 'Circle'
+  },
+  // Whether the freet was posted anonymously
+  anonymous: {
+    type: Boolean,
+    required: true
+  },
+  // Whether the freet has been designated as deleted
+  deleted: {
+    type: Boolean, 
     required: true
   }
 });

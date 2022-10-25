@@ -8,7 +8,7 @@ import FreetCollection from '../freet/collection';
 const isFreetExists = async (req: Request, res: Response, next: NextFunction) => {
   const validFormat = Types.ObjectId.isValid(req.params.freetId);
   const freet = validFormat ? await FreetCollection.findOne(req.params.freetId) : '';
-  if (!freet) {
+  if (!freet || freet.deleted) {
     res.status(404).json({
       error: {
         freetNotFound: `Freet with freet ID ${req.params.freetId} does not exist.`
@@ -50,7 +50,7 @@ const isFreetExists = async (req: Request, res: Response, next: NextFunction) =>
   }
   const validFormat = Types.ObjectId.isValid(req.query.freetId as string);
   const freet = validFormat ? await FreetCollection.findOne(req.query.freetId as string) : '';
-  if (!freet) {
+  if (!freet || freet.deleted) {
     res.status(404).json({
       error: {
         freetNotFound: `Freet with freet ID ${req.query.freetId} does not exist.`
