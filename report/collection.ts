@@ -81,6 +81,20 @@ class ReportCollection {
     return report.populate(['replyId', 'reporterId']);
   }
 
+    /**
+   * Delete all the reports of a freet
+   */
+     static async deleteManyByFreet(freetId: Types.ObjectId | string): Promise<void>{
+      await ReportModel.deleteMany({freetId: freetId});
+    }
+  
+    /**
+     * Delete all the reports of a reply
+     */
+     static async deleteManyByReply(replyId: Types.ObjectId | string): Promise<void>{
+      await ReportModel.deleteMany({replyId: replyId});
+    }
+
 }
 
 export default ReportCollection;

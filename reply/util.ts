@@ -40,7 +40,7 @@ const constructReplyResponse = (reply: HydratedDocument<Reply>): ReplyResponse =
   };
 
   const usernameDisplay = replyCopy.authorId ? replyCopy.authorId.username : undefined;
-
+  delete replyCopy.authorId
   return {
     ...replyCopy,
     _id: replyCopy._id.toString(),

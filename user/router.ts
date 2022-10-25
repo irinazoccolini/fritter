@@ -8,6 +8,7 @@ import * as followValidator from '../follow/middleware';
 import * as util from './util';
 import * as followUtil from '../follow/util';
 import ReplyCollection from '../reply/collection';
+import CircleCollection from '../circle/collection';
 
 const router = express.Router();
 
@@ -145,7 +146,13 @@ router.delete(
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     await UserCollection.deleteOne(userId);
     await FreetCollection.deleteManyByAuthor(userId);
-    await ReplyCollection.deleteManyByAuthor(userId)
+    await ReplyCollection.deleteManyByAuthor(userId);
+    const circles = await CircleCollection.findManyByCreatorId(userId);
+    for (const circle of circles){
+      await ReplyCollection.privateManyByCircle(circle._id);
+      await FreetCollection.privateManyByCircle(circle._id);
+    }
+    await CircleCollection.deleteManyByUser(userId);
     req.session.userId = undefined;
     res.status(200).json({
       message: 'Your account has been deleted successfully.'

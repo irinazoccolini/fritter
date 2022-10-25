@@ -150,6 +150,8 @@ router.delete(
     ],
     async (req: Request, res: Response) => {
         await ReplyCollection.deleteOne(req.params.replyId);
+        await LikeCollection.deleteManyByReply(req.params.replyId);
+        await ReportCollection.deleteManyByReply(req.params.replyId);
         res.status(200).json({
             message: 'Your reply was deleted successfully.'
         });

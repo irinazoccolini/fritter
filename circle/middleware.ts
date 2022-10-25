@@ -74,7 +74,7 @@ const isCircleCreator = async (req: Request, res: Response, next: NextFunction) 
  */
 const isValidCircleViewer = async (req: Request, res: Response, next: NextFunction) => {
     const circle = await CircleCollection.findOneById(req.params.circleId);
-    const circleMemberIds = new Set(circle.members.map(member => member.toString()));
+    const circleMemberIds = new Set(circle.members.map(member => member._id.toString()));
     const circleCreatorId = circle.creatorId._id.toString();
     if (req.session.userId !== circleCreatorId && !circleMemberIds.has(req.session.userId)){
         res.status(403).json({

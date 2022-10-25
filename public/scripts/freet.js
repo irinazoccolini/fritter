@@ -31,7 +31,7 @@ function editFreet(fields) {
 }
 
 function deleteFreet(fields) {
-  fetch(`/api/freets/${fields.id}`, {method: 'PATCH', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  fetch(`/api/freets/${fields.id}`, {method: 'DELETE'})
     .then(showResponse)
     .catch(showResponse);
 }

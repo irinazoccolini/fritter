@@ -36,7 +36,7 @@ const constructFreetResponse = (freet: HydratedDocument<Freet>): FreetResponse =
     })
   };
   const usernameDisplay = freetCopy.authorId ? freetCopy.authorId.username : undefined;
-
+  delete freetCopy.authorId;
   return {
     ...freetCopy,
     _id: freetCopy._id.toString(),

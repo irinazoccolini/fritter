@@ -106,6 +106,19 @@ class LikeCollection {
     return freet !== null;
   }
   
+  /**
+   * Delete all the likes of a freet
+   */
+  static async deleteManyByFreet(freetId: Types.ObjectId | string): Promise<void>{
+    await LikeModel.deleteMany({freetId: freetId});
+  }
+
+  /**
+   * Delete all the likes of a reply
+   */
+   static async deleteManyByReply(replyId: Types.ObjectId | string): Promise<void>{
+    await LikeModel.deleteMany({replyId: replyId});
+  }
 }
 
 export default LikeCollection;

@@ -130,10 +130,6 @@ router.post(
  */
 router.patch(
   '/:freetId?',
-  async (req: Request, res: Response, next: NextFunction) => {
-    if (req.body.content) next();
-    else next('route');
-  },
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
@@ -157,7 +153,7 @@ router.patch(
  *                 of the freet
  * @throws {404} - If the freetId is not valid
  */
-router.patch(
+router.delete(
   '/:freetId?',
   [
     userValidator.isUserLoggedIn,
@@ -166,6 +162,8 @@ router.patch(
   ],
   async (req: Request, res: Response) => {
     await FreetCollection.deleteOne(req.params.freetId);
+    await LikeCollection.deleteManyByFreet(req.params.freetId);
+    await ReportCollection.deleteManyByFreet(req.params.freetId);
     res.status(200).json({
       message: 'Your freet was deleted successfully.'
     });

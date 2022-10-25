@@ -8,6 +8,7 @@ import { Types } from 'mongoose';
 import FreetCollection from '../freet/collection';
 import * as freetUtil from '../freet/util';
 import * as util from "./util";
+import ReplyCollection from '../reply/collection';
 
 const router = express.Router();
 
@@ -142,6 +143,7 @@ router.delete(
     async (req: Request, res: Response) => {
         await CircleCollection.deleteOne(req.params.circleId);
         await FreetCollection.privateManyByCircle(req.params.circleId); // delete all the freets that were posted to this circle
+        await ReplyCollection.privateManyByCircle(req.params.circleId);
         res.status(200).json({
             message: "Your circle was successfully deleted."
         });
