@@ -154,6 +154,27 @@ const isAuthorExists = async (req: Request, res: Response, next: NextFunction) =
 };
 
 /**
+ * Checks if a user with username as username in req.params exists
+ */
+ const isUsernameInParamsExists = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.params.username) {
+    res.status(400).json({
+      error: 'Provided username must be nonempty.'
+    });
+    return;
+  }
+
+  const user = await UserCollection.findOneByUsername(req.params.username as string);
+  if (!user) {
+    res.status(404).json({
+      error: `A user with username ${req.params.username as string} does not exist.`
+    });
+    return;
+  }
+
+  next();
+};
+/**
  * Checks if all the username in a list of usernames in req.body exist.
  */
 const isUsersExist = async(req: Request, res: Response, next: NextFunction) => {
@@ -172,6 +193,24 @@ const isUsersExist = async(req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+/**
+ * Checks if the userId in req.params exists.
+ */
+const isUserExists = async(req: Request, res: Response, next: NextFunction) => {
+  const validFormat = Types.ObjectId.isValid(req.params.userId);
+  const user = validFormat ? await UserCollection.findOneByUserId(req.params.userId) : '';
+  if (!user) {
+    res.status(404).json({
+      error: {
+        userNotFound: `Freet with freet ID ${req.params.userId} does not exist.`
+      }
+    });
+    return;
+  }
+
+  next();
+}
+
 export {
   isCurrentSessionUserExists,
   isUserLoggedIn,
@@ -181,5 +220,7 @@ export {
   isAuthorExists,
   isValidUsername,
   isValidPassword,
-  isUsersExist
+  isUsersExist,
+  isUserExists,
+  isUsernameInParamsExists
 };

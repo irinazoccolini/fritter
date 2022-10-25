@@ -62,7 +62,7 @@ class LikeCollection {
    * @return {Promise<HydratedDocument<Like>[]>} - An array of all of the likes
    */
   static async findOneByReplyAndLiker(likerId: string, replyId: string): Promise<Array<HydratedDocument<Like>>> {
-    const like = LikeModel.find({replyId: replyId, likerId: likerId})
+    const like = LikeModel.findOne({replyId: replyId, likerId: likerId})
     return like.populate(['replyId', 'likerId']);
   }
 

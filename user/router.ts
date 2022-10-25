@@ -2,7 +2,9 @@ import type {Request, Response} from 'express';
 import express from 'express';
 import FreetCollection from '../freet/collection';
 import UserCollection from './collection';
+import FollowCollection from '../follow/collection';
 import * as userValidator from '../user/middleware';
+import * as followValidator from '../follow/middleware';
 import * as util from './util';
 
 const router = express.Router();
@@ -144,6 +146,107 @@ router.delete(
     req.session.userId = undefined;
     res.status(200).json({
       message: 'Your account has been deleted successfully.'
+    });
+  }
+);
+
+/**
+ * Follow a user.
+ * 
+ * @name POST /api/users/:username/followers
+ * 
+ * @return {Follow} - the newly created follow
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the given user id doesn't exist
+ */
+router.post(
+  '/:username?/followers',
+  [
+    userValidator.isUserLoggedIn,
+    userValidator.isUsernameInParamsExists,
+    followValidator.isFollowNotExists,
+    followValidator.isFollowable
+  ],
+  async (req: Request, res: Response) => {
+    const user = await UserCollection.findOneByUsername(req.params.username as string);
+    const follow = await FollowCollection.addFollow(req.session.userId, user._id.toString());
+    res.status(200).json({
+      message: "Your follow has been added successfully.",
+      follow: follow
+    });
+  }
+);
+
+/**
+ * Unfollow a user
+ * 
+ * @name DELETE /api/users/:username/followers
+ * 
+ * @return {string} - a sucess message
+ * @throws {403} - if the user is not logged in
+ * @throws {404} - if the given user id doesn't exist
+ */
+router.delete(
+  '/:username?/followers',
+  [
+    userValidator.isUserLoggedIn,
+    userValidator.isUsernameInParamsExists,
+    followValidator.isFollowExists
+  ],
+  async(req: Request, res: Response) => {
+    const user = await UserCollection.findOneByUsername(req.params.username as string);
+    await FollowCollection.deleteFollow(req.session.userId, user._id.toString());
+    res.status(200).json({
+      message: "Your follow was deleted successfully."
+    });
+  }
+);
+
+/**
+ * Get all of a user's followers
+ * 
+ * @name GET /api/users/:username/followers
+ * 
+ * @return {Follow[]} - an array of the followers
+ * @throws {403} - if the user is not logged in
+ */
+router.get(
+  '/:username?/followers',
+  [
+    userValidator.isUserLoggedIn
+  ],
+  async (req: Request, res: Response) => {
+    const user = await UserCollection.findOneByUsername(req.params.username as string);
+    console.log(req.params.username);
+    console.log(user);
+    console.log(user._id);
+    const followers = await FollowCollection.findByFollowee(user._id.toString());
+    res.status(200).json({
+      message: `Followers for user ${req.params.username} returned successfully.`,
+      followers: followers
+    });
+  }
+);
+
+/**
+ * Get all the users that a user is following
+ * 
+ * @name GET /api/users/:username/following
+ * 
+ * @return {Follow[]} - an array of who the user follows
+ * @throws {403} - if the user is not logged in
+ */
+router.get(
+  '/:username?/following',
+  [
+    userValidator.isUserLoggedIn
+  ],
+  async (req: Request, res: Response) => {
+    const user = await UserCollection.findOneByUsername(req.params.username as string);
+    const following = await FollowCollection.findByFollower(user._id.toString());
+    res.status(200).json({
+      message: `The users that user ${req.params.username} is following returned successfully.`,
+      followers: following
     });
   }
 );

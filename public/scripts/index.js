@@ -60,7 +60,11 @@ const formsAndHandlers = {
   'view-freets-by-circle': viewFreetsByCircle,
   'view-user-circles': viewUserCircles,
   'modify-circle-name': modifyCircle,
-  'modify-circle-members': modifyCircle
+  'modify-circle-members': modifyCircle,
+  'follow-user': followUser,
+  'unfollow-user': unfollowUser,
+  'view-user-followers': getUserFollowers,
+  'view-user-following': getUserFollowing
 };
 
 // Attach handlers to forms

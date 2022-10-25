@@ -38,3 +38,30 @@ function signOut() {
     .then(showResponse)
     .catch(showResponse);
 }
+
+function followUser(fields){
+  console.log("in this function")
+  fetch(`/api/users/${fields.username}/followers`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  .then(showResponse)
+  .catch(showResponse)
+}
+
+function unfollowUser(fields){
+  fetch(`/api/users/${fields.username}/followers`, {method: 'DELETE'})
+  .then(showResponse)
+  .catch(showResponse)
+}
+
+function getUserFollowers(fields){
+  fetch(`/api/users/${fields.username}/followers`)
+  .then(showResponse)
+  .catch(showResponse)
+}
+
+function getUserFollowing(fields){
+  fetch(`/api/users/${fields.username}/following`)
+  .then(showResponse)
+  .catch(showResponse)
+}
+
+
