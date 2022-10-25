@@ -73,7 +73,6 @@ router.patch(
         userValidator.isUsersExist
     ],
     async (req: Request, res: Response) => {
-        console.log(req.body);
         const usernames = req.body.usernames.split(",");
         const userIds: Types.ObjectId[] = [];
         for (const username of usernames){

@@ -40,7 +40,6 @@ function signOut() {
 }
 
 function followUser(fields){
-  console.log("in this function")
   fetch(`/api/users/${fields.username}/followers`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
   .then(showResponse)
   .catch(showResponse)

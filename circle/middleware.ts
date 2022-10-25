@@ -7,7 +7,6 @@ import { Types } from "mongoose";
  */
 const isCircleNotExists = async (req: Request, res: Response, next: NextFunction) => {
     const circle = await CircleCollection.findOneByNameAndUser(req.body.name, req.session.userId);
-    console.log(circle);
     if (circle){
         res.status(409).json({
             error: {

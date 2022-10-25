@@ -69,8 +69,6 @@ const isReplyExists = async (req: Request, res: Response, next: NextFunction) =>
  */
  const isValidReplyContent = (req: Request, res: Response, next: NextFunction) => {
   const {content} = req.body as {content: string};
-  console.log(content)
-  console.log("checking if the content is valid")
   if (!content.trim()) {
     res.status(400).json({
       error: 'Reply content must be at least one character long.'
