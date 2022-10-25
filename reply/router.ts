@@ -9,6 +9,7 @@ import ReplyCollection from '../reply/collection';
 import LikeCollection from '../like/collection';
 import ReportCollection from '../report/collection';
 import * as util from './util';
+import * as likeUtil from '../like/util';
 
 const router = express.Router();
 
@@ -54,7 +55,6 @@ router.post(
         replyValidator.isValidReplyContent
     ],
     async (req: Request, res: Response) => {
-        console.log("thinks that the content was fine?")
         const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
         const reply = await ReplyCollection.addReplyToReply(userId, req.params.replyId, req.body.anonymous, req.body.content);
 
@@ -146,7 +146,7 @@ router.post(
         const like = await LikeCollection.addReplyLike(userId, req.params.replyId);
         res.status(201).json({
             message: 'Your like was added successfully.',
-            like: like
+            like: likeUtil.constructLikeResponse(like)
         });
     }
 );
@@ -193,9 +193,10 @@ router.get(
     ],
     async (req: Request, res: Response) => {
         const replyLikes = await LikeCollection.findAllByReply(req.params.replyId as string);
+        const replyLikesReponse = replyLikes.map(like => likeUtil.constructLikeResponse(like));
         res.status(200).json({
-        message: `Reply ${req.params.replyId} has ${replyLikes.length} likes.`,
-        likes: replyLikes
+            message: `Reply ${req.params.replyId} has ${replyLikes.length} likes.`,
+            likes: replyLikesReponse
         });
     }
 )

@@ -1,11 +1,21 @@
+import { Freet } from '../freet/model';
 import {Schema, model} from 'mongoose';
 import { Types } from "mongoose"
+import { Reply } from '../reply/model';
+import { User } from '../user/model';
 
 export type Like = {
     _id: Types.ObjectId;
     likerId: Types.ObjectId;
     freetId: Types.ObjectId;
     replyId: Types.ObjectId;
+}
+
+export type PopulatedLike = {
+    _id: Types.ObjectId,
+    likerId: User,
+    freetId: Freet,
+    replyId: Reply
 }
 
 const LikeSchema = new Schema<Like>({

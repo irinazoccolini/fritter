@@ -9,6 +9,8 @@ import * as circleValidator from "../circle/middleware";
 import * as replyValidator from "../reply/middleware";
 import * as util from './util';
 import * as replyUtil from '../reply/util';
+import * as likeUtil from '../like/util';
+import * as reportUtil from '../report/util';
 import ReplyCollection from '../reply/collection';
 import LikeCollection from '../like/collection';
 import ReportCollection from '../report/collection';
@@ -218,7 +220,7 @@ router.post(
     const like = await LikeCollection.addFreetLike(userId, req.params.freetId);
     res.status(201).json({
         message: 'Your like was added successfully.',
-        like: like
+        like: likeUtil.constructLikeResponse(like)
       });
   }
 );
@@ -265,9 +267,10 @@ router.get(
   ],
   async (req: Request, res: Response) => {
     const freetLikes = await LikeCollection.findAllByFreet(req.params.freetId as string);
+    const freetLikesResponse = freetLikes.map(like => likeUtil.constructLikeResponse(like));
       res.status(200).json({
       message: `Freet ${req.params.freetId} has ${freetLikes.length} likes.`,
-      likes: freetLikes
+      likes: freetLikesResponse
     });
   }
 );
@@ -289,9 +292,10 @@ router.get(
   ],
   async (req: Request, res: Response) => {
     const freetReports = await ReportCollection.findAllByFreet(req.params.freetId as string);
+    const freetReportsResponse = freetReports.map(report => reportUtil.constructReportResponse(report));
       res.status(200).json({
       message: `Freet ${req.params.freetId} has ${freetReports.length} reports.`,
-      reports: freetReports
+      reports: freetReportsResponse
     });
   }
 );
@@ -322,7 +326,7 @@ router.post(
     }
     res.status(201).json({
         message: 'Your report was added successfully.',
-        report: report
+        report: reportUtil.constructReportResponse(report)
       });
   }
 );

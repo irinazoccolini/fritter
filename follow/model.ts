@@ -1,10 +1,17 @@
 import type {Types, PopulatedDoc, Document} from 'mongoose';
 import {Schema, model} from 'mongoose';
+import { User } from '../user/model';
 
 export type Follow = {
     _id: Types.ObjectId,
     follower: Types.ObjectId,
     followee: Types.ObjectId
+}
+
+export type PopulatedFollow = {
+    _id: Types.ObjectId,
+    follower: User,
+    followee: User
 }
 
 const FollowSchema = new Schema<Follow>({

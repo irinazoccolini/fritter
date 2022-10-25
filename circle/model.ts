@@ -10,6 +10,14 @@ export type Circle = {
     deletable: boolean;
 }
 
+export type PopulatedCircle = {
+    _id: Types.ObjectId;
+    creatorId: User;
+    name: string;
+    members: User[],
+    deletable: boolean;
+}
+
 const CircleSchema = new Schema<Circle>({
     creatorId: {
         type: Schema.Types.ObjectId,

@@ -1,11 +1,21 @@
+import { Freet } from 'freet/model';
 import {Schema, model} from 'mongoose';
 import { Types } from "mongoose"
+import { Reply } from 'reply/model';
+import { User } from 'user/model';
 
 export type Report = {
     _id: Types.ObjectId;
     reporterId: Types.ObjectId;
     freetId: Types.ObjectId;
     replyId: Types.ObjectId;
+}
+
+export type PopulatedReport = {
+    _id: Types.ObjectId;
+    reporterId: User;
+    freetId: Freet;
+    replyId: Reply;
 }
 
 const ReportSchema = new Schema<Report>({

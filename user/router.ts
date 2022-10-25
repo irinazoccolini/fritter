@@ -6,6 +6,7 @@ import FollowCollection from '../follow/collection';
 import * as userValidator from '../user/middleware';
 import * as followValidator from '../follow/middleware';
 import * as util from './util';
+import * as followUtil from '../follow/util';
 import ReplyCollection from '../reply/collection';
 
 const router = express.Router();
@@ -174,7 +175,7 @@ router.post(
     const follow = await FollowCollection.addFollow(req.session.userId, user._id.toString());
     res.status(200).json({
       message: "Your follow has been added successfully.",
-      follow: follow
+      follow: followUtil.constructFollowResponse(follow)
     });
   }
 );
@@ -220,9 +221,10 @@ router.get(
   async (req: Request, res: Response) => {
     const user = await UserCollection.findOneByUsername(req.params.username as string);
     const followers = await FollowCollection.findByFollowee(user._id.toString());
+    const followersResponse = followers.map(follower => followUtil.constructFollowResponse(follower))
     res.status(200).json({
       message: `Followers for user ${req.params.username} returned successfully.`,
-      followers: followers
+      followers: followersResponse
     });
   }
 );
@@ -243,9 +245,10 @@ router.get(
   async (req: Request, res: Response) => {
     const user = await UserCollection.findOneByUsername(req.params.username as string);
     const following = await FollowCollection.findByFollower(user._id.toString());
+    const followingResponse = following.map(follow => followUtil.constructFollowResponse(follow))
     res.status(200).json({
       message: `The users that user ${req.params.username} is following returned successfully.`,
-      followers: following
+      followers: followingResponse
     });
   }
 );
