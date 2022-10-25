@@ -1,9 +1,4 @@
 function replyToReply(fields){
-    if (fields.anonymous == "false"){
-      fields.anonymous = false;
-    } else if (fields.anonymous == "true"){
-      fields.anonymous = true;
-    }
     fetch(`/api/replies/${fields.id}/replies`, {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
     .then(showResponse)
     .catch(showResponse);
@@ -16,13 +11,13 @@ function viewRepliesToReply(fields){
 }
 
 function editReply(fields){
-  fetch(`/api/replies/${fields.id}`, {method: "PUT", body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
+  fetch(`/api/replies/${fields.id}`, {method: "PATCH", body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
   .then(showResponse)
   .catch(showResponse);
 }
 
 function deleteReply(fields){
-  fetch(`/api/replies/${fields.id}`, {method: "DELETE"})
+  fetch(`/api/replies/${fields.id}`, {method: "PATCH", body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
   .then(showResponse)
   .catch(showResponse);
 }

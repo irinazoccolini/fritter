@@ -51,8 +51,10 @@ router.post(
     [
         userValidator.isUserLoggedIn,
         replyValidator.isReplyExists,
+        replyValidator.isValidReplyContent
     ],
     async (req: Request, res: Response) => {
+        console.log("thinks that the content was fine?")
         const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
         const reply = await ReplyCollection.addReplyToReply(userId, req.params.replyId, req.body.anonymous, req.body.content);
 
@@ -62,6 +64,39 @@ router.post(
         });
     }
 )
+
+
+/**
+ * Modify a reply
+ *
+ * @name PATCH /api/replies/:id
+ *
+ * @param {string} content - the new content for the reply
+ * @return {ReplyResponse} - the updated reply
+ * @throws {403} - if the user is not logged in or not the author of
+ *                 of the reply
+ * @throws {404} - If the replyId is not valid
+ */
+router.patch(
+    '/:replyId?',
+    async (req: Request, res: Response, next: NextFunction) => {
+        if (req.body.content) next(); // change content
+        else next('route'); // delete reply
+      },
+    [
+        userValidator.isUserLoggedIn,
+        replyValidator.isReplyExists,
+        replyValidator.isValidReplyModifier,
+        replyValidator.isValidReplyContent
+    ],
+    async (req: Request, res: Response) => {
+        const reply = await ReplyCollection.updateOne(req.params.replyId, req.body.content);
+        res.status(200).json({
+        message: 'Your reply was updated successfully.',
+        reply: util.constructReplyResponse(reply)
+        });
+    }
+);
 
 /**
  * Delete a reply
@@ -73,7 +108,7 @@ router.post(
  *                 the reply
  * @throws {404} - If the replyId is not valid
  */
-router.delete(
+router.patch(
     '/:replyId?',
     [
         userValidator.isUserLoggedIn,
@@ -83,37 +118,10 @@ router.delete(
     async (req: Request, res: Response) => {
         await ReplyCollection.deleteOne(req.params.replyId);
         res.status(200).json({
-        message: 'Your reply was deleted successfully.'
+            message: 'Your reply was deleted successfully.'
         });
     }
-);
-
-/**
- * Modify a reply
- *
- * @name PUT /api/replies/:id
- *
- * @param {string} content - the new content for the reply
- * @return {ReplyResponse} - the updated reply
- * @throws {403} - if the user is not logged in or not the author of
- *                 of the reply
- * @throws {404} - If the replyId is not valid
- */
-router.put(
-    '/:replyId?',
-    [
-        userValidator.isUserLoggedIn,
-        replyValidator.isReplyExists,
-        replyValidator.isValidReplyModifier
-    ],
-    async (req: Request, res: Response) => {
-        const reply = await ReplyCollection.updateOne(req.params.replyId, req.body.content);
-        res.status(200).json({
-        message: 'Your reply was updated successfully.',
-        reply: util.constructReplyResponse(reply)
-        });
-    }
-);
+)
 
 
 /**

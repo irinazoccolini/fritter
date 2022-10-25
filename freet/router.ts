@@ -6,6 +6,7 @@ import * as freetValidator from '../freet/middleware';
 import * as likeValidator from "../like/middleware";
 import * as reportValidator from "../report/middleware";
 import * as circleValidator from "../circle/middleware";
+import * as replyValidator from "../reply/middleware";
 import * as util from './util';
 import * as replyUtil from '../reply/util';
 import ReplyCollection from '../reply/collection';
@@ -182,6 +183,7 @@ router.post(
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
+    replyValidator.isValidReplyContent
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn

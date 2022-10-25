@@ -1,6 +1,7 @@
 import {Types, PopulatedDoc, Document} from 'mongoose';
 import {Schema, model} from 'mongoose';
 import type {User} from '../user/model';
+import type {Freet} from '../freet/model';
 
 export type Reply = {
     _id: Types.ObjectId;
@@ -11,17 +12,19 @@ export type Reply = {
     dateCreated: Date;
     dateModified: Date;
     anonymous: Boolean;
+    deleted: Boolean;
 };
 
 export type PopulatedReply = {
     _id: Types.ObjectId;
     authorId: User;
-    parentFreet: Types.ObjectId;
-    parentReply: Types.ObjectId;
+    parentFreet: Freet;
+    parentReply: Reply;
     content: string;
     dateCreated: Date;
     dateModified: Date;
     anonymous: Boolean;
+    deleted: Boolean;
 };
 
 const ReplySchema = new Schema<Reply>({
@@ -53,6 +56,10 @@ const ReplySchema = new Schema<Reply>({
         required: true
     },
     anonymous: {
+        type: Boolean,
+        required: true
+    },
+    deleted: {
         type: Boolean,
         required: true
     }

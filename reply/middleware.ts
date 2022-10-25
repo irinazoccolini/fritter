@@ -8,7 +8,7 @@ import ReplyCollection from './collection';
 const isReplyExists = async (req: Request, res: Response, next: NextFunction) => {
   const validFormat = Types.ObjectId.isValid(req.params.replyId as string);
   const reply = validFormat ? await ReplyCollection.findOneById(req.params.replyId as string) : '';
-  if (!reply) {
+  if (!reply || reply.deleted) {
     res.status(404).json({
       error: {
         replyNotFound: `Reply with reply ID ${req.params.replyId} does not exist.`
@@ -28,7 +28,7 @@ const isReplyExists = async (req: Request, res: Response, next: NextFunction) =>
   const userId = reply.authorId._id;
   if (req.session.userId !== userId.toString()) {
     res.status(403).json({
-      error: 'Cannot modify other users\' freets.'
+      error: 'Cannot modify or delete other users\' replies.'
     });
     return;
   }
@@ -60,10 +60,38 @@ const isReplyExists = async (req: Request, res: Response, next: NextFunction) =>
 
   next();
 };
+
+
+/**
+ * Checks if the content of the reply in req.body is valid, i.e not a stream of empty
+ * spaces and not more than 140 characters
+ */
+ const isValidReplyContent = (req: Request, res: Response, next: NextFunction) => {
+  const {content} = req.body as {content: string};
+  console.log(content)
+  console.log("checking if the content is valid")
+  if (!content.trim()) {
+    res.status(400).json({
+      error: 'Reply content must be at least one character long.'
+    });
+    return;
+  }
+
+  if (content.length > 140) {
+    res.status(413).json({
+      error: 'Reply content must be no more than 140 characters.'
+    });
+    return;
+  }
+
+  next();
+};
+
   
 
 export {
     isReplyExists,
     isValidReplyModifier,
-    isReplyExistsInQuery
+    isReplyExistsInQuery,
+    isValidReplyContent
 };

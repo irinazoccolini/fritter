@@ -6,6 +6,7 @@ import FollowCollection from '../follow/collection';
 import * as userValidator from '../user/middleware';
 import * as followValidator from '../follow/middleware';
 import * as util from './util';
+import ReplyCollection from '../reply/collection';
 
 const router = express.Router();
 
@@ -143,6 +144,7 @@ router.delete(
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     await UserCollection.deleteOne(userId);
     await FreetCollection.deleteManyByAuthor(userId);
+    await ReplyCollection.deleteManyByAuthor(userId)
     req.session.userId = undefined;
     res.status(200).json({
       message: 'Your account has been deleted successfully.'
@@ -217,9 +219,6 @@ router.get(
   ],
   async (req: Request, res: Response) => {
     const user = await UserCollection.findOneByUsername(req.params.username as string);
-    console.log(req.params.username);
-    console.log(user);
-    console.log(user._id);
     const followers = await FollowCollection.findByFollowee(user._id.toString());
     res.status(200).json({
       message: `Followers for user ${req.params.username} returned successfully.`,

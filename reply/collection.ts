@@ -2,11 +2,6 @@ import type {HydratedDocument, Types} from 'mongoose';
 import ReplyModel from './model';
 import type { Reply } from './model';
 
-enum ContentType {
-    Freet,
-    Reply
-}
-
 class ReplyCollection {
     /**
      * Add a reply to a freet to the collection.
@@ -26,7 +21,8 @@ class ReplyCollection {
             content: content,
             dateCreated: date,
             dateModified: date,
-            anonymous: anonymous
+            anonymous: anonymous,
+            deleted: false
         });
         await reply.save(); // Saves reply to MongoDB
         return reply.populate(['authorId', 'parentFreet']);
@@ -50,7 +46,8 @@ class ReplyCollection {
         content: content,
         dateCreated: date,
         dateModified: date,
-        anonymous: anonymous
+        anonymous: anonymous,
+        deleted: false
         });
         await reply.save(); // Saves reply to MongoDB
         return reply.populate(['authorId', 'parentReply']);
@@ -62,21 +59,11 @@ class ReplyCollection {
      * @param {string} replyId - the id of the reply to delete
      */
     static async deleteOne(replyId: Types.ObjectId | string): Promise<void>{
-        const reply = await ReplyModel.deleteOne({_id: replyId});
-    }
-
-    /**
-     * Delete all replies to a parent item (freet or reply).
-     * 
-     * @param {ContentType} parentType - the type of the parent item
-     * @param {string} parentId - the id of the parent item
-     */
-    static async deleteManyByParent(parentType: ContentType, parentId: Types.ObjectId | string): Promise<void>{
-        if (parentType == ContentType.Freet){
-            await ReplyModel.deleteMany({parentFreet: parentId});
-        } else {
-            await ReplyModel.deleteMany({parentReply: parentId});
-        }
+        const reply = await ReplyModel.findOne({_id: replyId});
+        reply.deleted = true;
+        reply.dateModified = new Date();
+        await reply.save();
+        return reply.populate(["authorId", "parentFreet", "parentReply"]);
     }
 
     /**
@@ -125,7 +112,7 @@ class ReplyCollection {
      * @param {string} authorId - the id of the author
      */
     static async deleteManyByAuthor(authorId: Types.ObjectId | string): Promise<void>{
-        await ReplyModel.deleteMany({authorId: authorId});
+        await ReplyModel.updateMany({authorId: authorId}, {deleted: true, dateModified: new Date()});
     }
 
     /**
