@@ -65,7 +65,7 @@ class ReportCollection {
    * @return {Promise<HydratedDocument<Report>[]>} - An array of all of the reports
    */
   static async findOneByFreetAndReporter(reporterId: string, freetId: string): Promise<Array<HydratedDocument<Report>>> {
-    const report = ReportModel.find({freetId: freetId, reporterId: reporterId});
+    const report = ReportModel.findOne({freetId: freetId, reporterId: reporterId});
     return report.populate(['freetId', 'reporterId']);
   }
 
@@ -77,7 +77,7 @@ class ReportCollection {
    * @return {Promise<HydratedDocument<Report>[]>} - An array of all of the reports
    */
    static async findOneByReplyAndReporter(reporterId: string, replyId: string): Promise<Array<HydratedDocument<Report>>> {
-    const report = ReportModel.find({replyId: replyId, reporterId: reporterId})
+    const report = ReportModel.findOne({replyId: replyId, reporterId: reporterId})
     return report.populate(['replyId', 'reporterId']);
   }
 
