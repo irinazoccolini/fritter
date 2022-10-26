@@ -101,7 +101,7 @@ class ReplyCollection {
      * @return {Promise<HydratedDocument<Reply>[]>} - An array of all of the replies
      */
     static async findAllByAuthor(authorId: Types.ObjectId | string): Promise<HydratedDocument<Reply>[]>{
-        return ReplyModel.find({authorId: authorId}).populate(["authorId", "parentFreet", "parentReply"]);
+        return ReplyModel.find({authorId: authorId}).sort({dateModified: -1}).populate(["authorId", "parentFreet", "parentReply"]);
     }
 
     /**
@@ -135,6 +135,21 @@ class ReplyCollection {
      */
     static async privateManyByCircle(circleId: Types.ObjectId | string): Promise<void> {
         await ReplyModel.updateMany({circle: circleId}, {private: true});
+    }
+
+    /**
+     * Find visible replies on another user's profile based on a list of circle ids and which replies are public 
+     * 
+     * @param {Types.ObjectId[]} circleIds - list of circle ids
+     */
+    static async findVisibleReplies(circleIds: Types.ObjectId[]):  Promise<Array<HydratedDocument<Reply>>> {
+        return ReplyModel.find({
+        circle: {
+            $in: circleIds.concat([null])
+        },
+        private: false,
+        anonymous: false
+        }).sort({dateModified: -1}).populate(["circle", "authorId", "parentFreet", "parentReply"]);
     }
 
 }

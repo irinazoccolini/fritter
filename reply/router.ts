@@ -9,11 +9,49 @@ import ReplyCollection from '../reply/collection';
 import LikeCollection from '../like/collection';
 import ReportCollection from '../report/collection';
 import CircleCollection from '../circle/collection';
+import UserCollection from '../user/collection';
 import * as util from './util';
 import * as likeUtil from '../like/util';
+import * as reportUtil from '../report/util';
+import { Types } from 'mongoose';
 
 const router = express.Router();
-
+/**
+ * Get all the replies by author
+ * 
+ * @name GET /api/replies?authorId=id
+ * @return {ReplyResponse[]} - An array of freets created by user with id, authorId
+ * @throws {400} - If authorId is not given
+ * @throws {404} - If no user has given authorId
+ */
+router.get(
+    "/",
+    [
+        userValidator.isAuthorExists
+    ],
+    async (req: Request, res: Response) => {
+        // return everything if the user is looking for their own replies
+        const author = await UserCollection.findOneByUsername(req.query.author as string);
+        if (author._id.toString() === req.session.userId) {
+          const authorReplies = await ReplyCollection.findAllByAuthor(author._id.toString());
+          const response = authorReplies.map(util.constructReplyResponse);
+          res.status(200).json(response);
+        }
+        else {
+          const authorCircles = await CircleCollection.findManyByCreatorId(author._id);
+          const overlappingCircleIds: Types.ObjectId[] = []
+          for (const circle of authorCircles) {
+            const circleMembersIds = new Set(circle.members.map(member => member._id.toString()));
+            if (circleMembersIds.has(req.session.userId)) {
+              overlappingCircleIds.push(circle._id)
+            }
+          }
+          const visibleReplies = await ReplyCollection.findVisibleReplies(overlappingCircleIds);
+          const response = visibleReplies.map(util.constructReplyResponse);
+          res.status(200).json(response);
+        }
+      }
+)
 /**
  * Get all replies to a reply
  * 
@@ -85,13 +123,13 @@ router.post(
         const reply = await ReplyCollection.findOneById(req.params.replyId);
         const circle = reply.circle ? await CircleCollection.findOneById(reply.circle._id) : undefined;
         if (circle) {
-          const reply = await ReplyCollection.addReplyToReply(userId, req.params.freetId, req.body.anonymous, req.body.content, circle._id);
+          const reply = await ReplyCollection.addReplyToReply(userId, req.params.replyId, req.body.anonymous, req.body.content, circle._id);
           res.status(201).json({
             message: 'Your reply was created successfully.',
             reply: util.constructReplyResponse(reply)
           });
         } else {
-          const reply = await ReplyCollection.addReplyToReply(userId, req.params.freetId, req.body.anonymous, req.body.content, undefined);
+          const reply = await ReplyCollection.addReplyToReply(userId, req.params.replyId, req.body.anonymous, req.body.content, undefined);
     
           res.status(201).json({
             message: 'Your reply was created successfully.',
@@ -253,9 +291,10 @@ router.get(
     ],
     async (req: Request, res: Response) => {
       const replyReports = await ReportCollection.findAllByReply(req.params.replyId as string);
+      const replyReportsResponse = replyReports.map(report => reportUtil.constructReportResponse(report));
         res.status(200).json({
         message: `Reply ${req.params.replyId} has ${replyReports.length} reports.`,
-        reports: replyReports
+        reports: replyReportsResponse
       });
     }
 );
@@ -281,12 +320,12 @@ router.post(
         const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
         const report = await ReportCollection.addReplyReport(userId, req.params.replyId);
         const allReports = await ReportCollection.findAllByReply(req.params.replyId);
-        if (allReports.length >= 3){
+        if (allReports.length >= 10){
             await ReplyCollection.deleteOne(req.params.replyId);
         }
         res.status(201).json({
             message: 'Your report was added successfully.',
-            report: report
+            report: reportUtil.constructReportResponse(report)
         });
     }
 );

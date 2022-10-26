@@ -3,6 +3,7 @@ import type {Freet} from './model';
 import FreetModel from './model';
 import UserCollection from '../user/collection';
 import { circleRouter } from 'circle/router';
+import type {User} from '../user/model';
 
 /**
  * This files contains a class that has the functionality to explore freets
@@ -77,7 +78,7 @@ class FreetCollection {
    */
   static async findAllByUsername(username: string): Promise<Array<HydratedDocument<Freet>>> {
     const author = await UserCollection.findOneByUsername(username);
-    return FreetModel.find({authorId: author._id}).populate(['authorId', 'circle']);
+    return FreetModel.find({authorId: author._id}).sort({dateModified: -1}).populate(['authorId', 'circle']);
   }
 
   /**
@@ -131,6 +132,45 @@ class FreetCollection {
    */
   static async privateManyByCircle(circleId: Types.ObjectId | string): Promise<void>{
     await FreetModel.updateMany({circle:circleId}, {private: true, dateModified: new Date()});
+  }
+
+  /**
+   * Find visible freets based on a list of circle ids and which freets are public
+   * 
+   * @param {Types.ObjectId[]} circleIds - list of circle ids
+   */
+  static async findVisibleFreets(circleIds: Types.ObjectId[]):  Promise<Array<HydratedDocument<Freet>>> {
+    return FreetModel.find({
+      circle: {
+        $in: circleIds.concat([null])
+      },
+      private: false,
+      anonymous: false
+    }).sort({dateModified: -1}).populate(["circle", "authorId"]);
+  }
+
+  static async findFollowingFeedFreets(circleIds: Types.ObjectId[], following: Types.ObjectId[]): Promise<Array<HydratedDocument<Freet>>>{
+    console.log(following)
+    console.log(circleIds)
+    return FreetModel.find({
+      circle: {
+        $in: circleIds.concat([null])
+      },
+      private: false,
+      anonymous: false,
+      authorId: {
+        $in: following
+      }
+    }).sort({dateModified: -1}).populate(["circle", "authorId"]);
+  }
+
+  static async findAllViewableFreets(circleIds: Types.ObjectId[]): Promise<Array<HydratedDocument<Freet>>>{
+    return FreetModel.find({
+      circle: {
+        $in: circleIds.concat([null])
+      },
+      private: false
+    }).sort({dateModified: -1}).populate(["circle", "authorId"]);
   }
 }
 

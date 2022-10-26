@@ -8,7 +8,7 @@ import LikeCollection from '../like/collection';
 const isFreetLikeNotExists = async (req: Request, res: Response, next: NextFunction) => {
   const validFormat = Types.ObjectId.isValid(req.params.freetId);
   const like = validFormat ? await LikeCollection.findOneByFreetAndLiker(req.session.userId, req.params.freetId) : '';
-  if (like.length !== 0) {
+  if (like) {
     res.status(409).json({
       error: {
         likeExists: `User with ID ${req.session.userId} has already liked freet with ID ${req.params.freetId}.`
@@ -25,7 +25,7 @@ const isFreetLikeNotExists = async (req: Request, res: Response, next: NextFunct
  const isFreetLikeExists = async (req: Request, res: Response, next: NextFunction) => {
   const validFormat = Types.ObjectId.isValid(req.params.freetId);
   const like = validFormat ? await LikeCollection.findOneByFreetAndLiker(req.session.userId, req.params.freetId) : '';
-  if (like.length == 0) {
+  if (!like) {
     res.status(404).json({
       error: {
         likeNotExists: `A like for freet ${req.params.freetId} from user ${req.session.userId} does not exist.`
@@ -42,7 +42,7 @@ const isFreetLikeNotExists = async (req: Request, res: Response, next: NextFunct
  const isReplyLikeNotExists = async (req: Request, res: Response, next: NextFunction) => {
   const validFormat = Types.ObjectId.isValid(req.params.replyId);
   const like = validFormat ? await LikeCollection.findOneByReplyAndLiker(req.session.userId, req.params.replyId) : '';
-  if (like.length !== 0) {
+  if (like) {
     res.status(409).json({
       error: {
         likeExists: `User with ID ${req.session.userId} has already liked reply with ID ${req.params.replyId}.`
@@ -59,7 +59,7 @@ const isFreetLikeNotExists = async (req: Request, res: Response, next: NextFunct
  const isReplyLikeExists = async (req: Request, res: Response, next: NextFunction) => {
   const validFormat = Types.ObjectId.isValid(req.params.replyId);
   const like = validFormat ? await LikeCollection.findOneByReplyAndLiker(req.session.userId, req.params.replyId) : '';
-  if (like.length == 0) {
+  if (!like) {
     res.status(404).json({
       error: {
         likeNotExists: `A like for reply ${req.params.replyId} from user ${req.session.userId} does not exist.`

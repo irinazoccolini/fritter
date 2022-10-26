@@ -57,3 +57,9 @@ function viewReplyById(fields){
   .then(showResponse)
   .catch(showResponse)
 }
+
+function viewRepliesByAuthor(fields) {
+  fetch(`/api/replies?author=${fields.id}`)
+    .then(showResponse)
+    .catch(showResponse);
+}

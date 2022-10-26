@@ -15,6 +15,9 @@ import ReplyCollection from '../reply/collection';
 import LikeCollection from '../like/collection';
 import ReportCollection from '../report/collection';
 import CircleCollection from '../circle/collection';
+import UserCollection from '../user/collection';
+import { Types } from 'mongoose';
+import FollowCollection from '../follow/collection';
 
 const router = express.Router();
 
@@ -44,8 +47,9 @@ router.get(
       next();
       return;
     }
-
-    const allFreets = await FreetCollection.findAll();
+    const userCircles = await CircleCollection.findManyByMember(req.session.userId);
+    const userCirclesIds = userCircles.map(circle => circle._id);
+    const allFreets = await FreetCollection.findAllViewableFreets(userCirclesIds);
     const response = allFreets.map(util.constructFreetResponse);
     res.status(200).json(response);
   },
@@ -53,11 +57,52 @@ router.get(
     userValidator.isAuthorExists
   ],
   async (req: Request, res: Response) => {
-    const authorFreets = await FreetCollection.findAllByUsername(req.query.author as string);
-    const response = authorFreets.map(util.constructFreetResponse);
-    res.status(200).json(response);
+    // return everything if the user is looking for their own freets
+    const author = await UserCollection.findOneByUsername(req.query.author as string);
+    if (author._id.toString() === req.session.userId) {
+      const authorFreets = await FreetCollection.findAllByUsername(req.query.author as string);
+      const response = authorFreets.map(util.constructFreetResponse);
+      res.status(200).json(response);
+    }
+    else {
+      const authorCircles = await CircleCollection.findManyByCreatorId(author._id);
+      const overlappingCircleIds: Types.ObjectId[] = []
+      for (const circle of authorCircles) {
+        const circleMembersIds = new Set(circle.members.map(member => member._id.toString()));
+        if (circleMembersIds.has(req.session.userId)) {
+          overlappingCircleIds.push(circle._id)
+        }
+      }
+      const visibleFreets = await FreetCollection.findVisibleFreets(overlappingCircleIds);
+      const response = visibleFreets.map(util.constructFreetResponse);
+      res.status(200).json(response);
+    }
   }
 );
+
+/**
+ * Get the following feed freets of the current user.
+ * 
+ * @name GET /api/freets/followingFeed
+ */
+ router.get(
+  '/followingFeed',
+  [
+    userValidator.isUserLoggedIn
+  ],
+  async (req: Request, res: Response) => {
+    const userFollowing = await FollowCollection.findByFollower(req.session.userId);
+    const userFollowingIds = userFollowing.map(following => following.followee);
+    const userCircles = await CircleCollection.findManyByMember(req.session.userId);
+    const userCirclesIds = userCircles.map(circle => circle._id);
+    const followingFeedFreets = await FreetCollection.findFollowingFeedFreets(userCirclesIds, userFollowingIds);
+    const followFeedResponse = followingFeedFreets.map(freet => util.constructFreetResponse(freet));
+    res.status(200).json({
+      message: "Your following feed was retrived successfully.",
+      followingFeed: followFeedResponse
+    })
+  }
+)
 
 /**
  * Get a freet from its id
@@ -371,5 +416,7 @@ router.post(
       });
   }
 );
+
+
 
 export {router as freetRouter};

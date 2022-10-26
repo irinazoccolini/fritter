@@ -1,8 +1,27 @@
 import type {HydratedDocument, Types} from 'mongoose';
+import { isValidCircleViewer } from './middleware';
 import type {Circle} from './model';
 import CircleModel from './model';
 
 class CircleCollection {
+
+    /**
+     * Add the mutuals circle to the collection.
+     * 
+     * @param {string} creatorId - the creator of the circle
+     * @return {Promise<HydratedDocument<Circle>>} - The newly created circle
+     */
+    static async addMutuals(creatorId: Types.ObjectId | string): Promise<HydratedDocument<Circle>> {
+        const circle = new CircleModel({
+            creatorId: creatorId,
+            name: "Mutuals",
+            members: [],
+            deletable: false
+        });
+        await circle.save();
+        return circle.populate(["creatorId", "members"]);
+    }
+
     /**
      * Add a circle to the collection.
      * 
@@ -97,6 +116,29 @@ class CircleCollection {
      */
      static async deleteManyByUser(creatorId: Types.ObjectId | string): Promise<void> {
         await CircleModel.deleteMany({creatorId: creatorId});
+    }
+
+    /**
+     * Find all circles that a user is a member of
+     * 
+     * @param memberId 
+     * @returns 
+     */
+    static async findManyByMember(memberId: Types.ObjectId | string): Promise<Array<HydratedDocument<Circle>>>{
+        return CircleModel.find({members: memberId}).populate(["creatorId", "members"]);
+    }
+
+    /**
+     * Add a member to a user's mutuals circle
+     * 
+     * @param memberId
+     * @param creatorId
+     */
+    static async addMemberToMutuals(memberId: Types.ObjectId, creatorId: Types.ObjectId | string): Promise<void> {
+        const circle = await CircleCollection.findOneByNameAndUser("Mutuals", creatorId);
+        circle.members = circle.members.concat([memberId]);
+        circle.save();
+        circle.populate(["creatorId", "members"]);
     }
 
 }

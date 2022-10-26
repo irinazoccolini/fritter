@@ -82,3 +82,9 @@ function viewFreetById(fields){
   .then(showResponse)
   .catch(showResponse)
 }
+
+function viewFollowingFeed(fields){
+  fetch('/api/freets/followingFeed')
+  .then(showResponse)
+  .catch(showResponse)
+}

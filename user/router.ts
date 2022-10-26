@@ -91,6 +91,7 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     const user = await UserCollection.addOne(req.body.username, req.body.password);
+    await CircleCollection.addMutuals(user._id.toString());
     req.session.userId = user._id.toString();
     res.status(201).json({
       message: `Your account was created successfully. You have been logged in as ${user.username}`,
@@ -178,8 +179,14 @@ router.post(
     followValidator.isFollowable
   ],
   async (req: Request, res: Response) => {
-    const user = await UserCollection.findOneByUsername(req.params.username as string);
-    const follow = await FollowCollection.addFollow(req.session.userId, user._id.toString());
+    const currentUser = await UserCollection.findOneByUserId(req.session.userId as string);
+    const userToFollow = await UserCollection.findOneByUsername(req.params.username as string);
+    const follow = await FollowCollection.addFollow(req.session.userId, userToFollow._id.toString());
+    const followInverse = await FollowCollection.findOneByFollowerAndFollowee(userToFollow._id.toString(), req.session.userId);
+    if (followInverse){
+      await CircleCollection.addMemberToMutuals(userToFollow._id, currentUser._id);
+      await CircleCollection.addMemberToMutuals(currentUser._id, userToFollow._id);
+    }
     res.status(200).json({
       message: "Your follow has been added successfully.",
       follow: followUtil.constructFollowResponse(follow)
