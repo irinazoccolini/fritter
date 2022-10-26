@@ -230,7 +230,8 @@ router.delete(
 router.get(
   '/:username?/followers',
   [
-    userValidator.isUserLoggedIn
+    userValidator.isUserLoggedIn,
+    userValidator.isUsernameInParamsExists,
   ],
   async (req: Request, res: Response) => {
     const user = await UserCollection.findOneByUsername(req.params.username as string);
@@ -254,7 +255,8 @@ router.get(
 router.get(
   '/:username?/following',
   [
-    userValidator.isUserLoggedIn
+    userValidator.isUserLoggedIn,
+    userValidator.isUsernameInParamsExists,
   ],
   async (req: Request, res: Response) => {
     const user = await UserCollection.findOneByUsername(req.params.username as string);

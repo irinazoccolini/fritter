@@ -175,70 +175,413 @@ The following api routes have already been implemented for you (**Make sure to d
 
 This renders the `index.html` file that will be used to interact with the backend
 
-#### `GET /api/freets` - Get all the freets
-
-**Returns**
-
-- An array of all freets sorted in descending order by date modified
-
-#### `GET /api/freets?author=USERNAME` - Get freets by author
-
-**Returns**
-
-- An array of freets created by user with username `author`
-
-**Throws**
-
-- `400` if `author` is not given
-- `404` if `author` is not a recognized username of any user
-
-#### `POST /api/freets` - Create a new freet
+#### `POST /api/circles` - Create a new circle
 
 **Body**
 
-- `content` _{string}_ - The content of the freet
+- `usernames` _string[]_  - the usernames (comma-separated) of the members of the circle
+- `name` _string_  - the name of the circle
+
+**Returns**
+
+- The newly created circle 
+- A success message
+
+**Throws** 
+
+- `403` if the user is not logged in
+- `409` if a circle with the given name already exists
+- `400` if any username passed in is not valid or if the circle name is empty
+- `413` if the circle name is too long (> 50 chars)
+
+#### `GET /api/circles/:circleId` - Get the data about the requested circle
+
+**Returns**
+
+- The request circle object
+
+**Throws**
+
+- `403` if the user is not logged or the user isn't the owner of the circle
+- `404` if the circle doesn't exist
+
+#### `GET /api/circles` - Get the circles owned by the currently signed in user
+
+**Returns**
+
+- An array of the user's circles
+
+**Throws** 
+
+- `403` if the user is not logged in 
+
+#### `PATCH /api/circles/:circleId` - Update a circle's name or members
+
+**Body** _(no need to add fields that are not being changed)_
+
+- `members` _string[]_  - the usernames (comma-separated) of the members of the circle
+- `name` _string_  - the name of the circle
+
+**Returns**
+
+- The updated circle
+- A success message
+
+**Throws** 
+- `403` if the user is not logged in or if the user is not the owner of the circle
+- `404` if the circle doesn't exist
+- `400` if any username passed in as a circle member is not valid or if the circle name is empty
+- `413` if the circle name is too long (> 50 chars)
+- `409` if a circle with the updated name already exists
+
+#### `DELETE /api/circles/:circleId` - Delete a circle
 
 **Returns**
 
 - A success message
-- A object with the created freet
 
 **Throws**
+- `403` if the user is not logged in or if the user is not the owner of the circle
+- `404` if a circle with the given id doesn't exist
+- `400` if the user is trying to delete their auto-generated mutuals circle
 
-- `403` if the user is not logged in
-- `400` If the freet content is empty or a stream of empty spaces
-- `413` If the freet content is more than 140 characters long
 
-#### `DELETE /api/freets/:freetId?` - Delete an existing freet
+#### `GET /api/circles/:circleId/freets` - Get all the freets posted to a circle
 
 **Returns**
 
+- An array of the freets
 - A success message
+
+#### `GET /api/freets` - Get all the freets visible to the current user 
+
+**Returns**
+
+- An array of freets (includes freets posted to circles that the user is part of and all non-private freets)
 
 **Throws**
 
 - `403` if the user is not logged in
-- `403` if the user is not the author of the freet
-- `404` if the freetId is invalid
 
-#### `PUT /api/freets/:freetId?` - Update an existing freet
+#### `GET /api/freets?authorId=id` - Get all the freets by a specifc author that are visible to the current user 
+
+**Returns**
+
+- If the user is looking for another user's freets: an array of freets (includes freets posted to circles that the user is part of and all non-private freets. doesn't include anonymous freets because that would expose the user who posted them)
+- If the user is looking for their own freets: an array of all of their freets
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the author id provided doesn't exist
+
+#### `GET /api/freets/followingFeed` - Get the freets in the current user's following feed
+
+**Returns**
+
+- An array of freets (all the freets posted by the users that the current user is following, sorted in descending order by date modified)
+
+**Throws**
+
+- `403` if the user is not logged in
+
+#### `GET /api/freets/:freetId` - Get a freet from its id
+
+**Returns**
+
+- The freet object
+
+**Throws**
+
+- `403` if the user is not logged in or if the user is not a valid viewer for this freet 
+- `404` if the freet doesn't exist
+
+#### `POST /api/freets` - Create a new freet 
 
 **Body**
 
-- `content` _{string}_ - The new content of the freet
+- `content` _string_ - the freet's content
+- `anonymous` _boolean_ - whether the freet is anonymous
+- `circleId` _string_ - the circle to post the freet to, if any
+
+**Returns**
+
+- The newly created freet object
+
+**Throws**
+- `403` if the user is not logged in 
+- `400` if the freet content is empty or a stream of empty spaces
+- `413` if the freet content is more than 140 characters 
+
+#### `PATCH /api/freets/:freetId` - Modify a freet's content
+
+**Body**
+
+- `content` _string_ - the freet's content
+
+**Returns** 
+
+- The modified freet object
+
+**Throws**
+
+- `403` if the user is not logged in or if the user is not the author of the freet
+- `404` if the freet id is not valid
+- `400` if the freet content is empty or a stream of empty spaces
+- `413` if the freet content is more than 140 characters
+
+#### `DELETE /api/freets/:freetId` - Delete a freet
+
+**Returns**
+ 
+- a success message
+
+**Throws**
+
+- `403` if the user is not logged in or if the user is not the author of the freet
+- `404` if the freet id is not valid
+
+#### `GET /api/freets/:freetId/replies` - Get all the replies to a freet
+
+**Returns** 
+
+- an array of the freet replies
+
+**Throws**
+
+- `403` if the user is not logged in or if the user can't access the freet
+- `404` if the freet id is not valid
+
+#### `POST /api/freets/:freetId/replies` - Post a reply to a freet
+
+**Body** 
+
+- `content` _string_ - the reply's content
+- `anonymous` _boolean_ - whether the reply is anonymous
+
+**Returns** 
+
+- The newly created reply 
+
+**Throws** 
+
+- `403` if the user is not logged in or if the user doesn't have access to the freet
+- `404` if the freet doesn't exist
+- `400` if the reply content is empty or a stream of empty spaces
+- `413` if the reply content is more than 140 characters
+
+#### `POST /api/freets/:freetId/likes` - Like a freet
+
+**Body**
+- None
+
+**Returns**
+
+- The newly created like
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the freet
+- `404` if the freet doesn't exist
+- `409` if the user has already liked the freet
+
+#### `DELETE /api/freets/:freetId/likes` - Unlike a freet
+
+**Body**
+- None
 
 **Returns**
 
 - A success message
-- An object with the updated freet
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the freet
+- `404` if the freet doesn't exist or if the user hasn't already liked the freet
+
+#### `GET /api/freets/:freetId/likes` - Get all the likes for a freet
+
+**Returns**
+
+- An array of the freet likes
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the freet
+- `404` if the freet doesn't exist
+
+#### `GET /api/freets/:freetId/reports` - Get all the reports for a freet
+
+**Returns**
+
+- An array of the freet reports
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the freet
+- `404` if the freet doesn't exist
+
+#### `POST /api/freets/:freetId/reports` - report a freet
+
+**Body**
+- None
+
+**Returns**
+
+- The newly created report
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the freet
+- `404` if the freet doesn't exist
+- `409` if the user has already reported the freet
+
+#### `GET /api/replies?authorId=id` - Get all the replies by a specifc author that are visible to the current user 
+
+**Returns**
+
+- If the user is looking for another user's replies: an array of replies (includes replies posted to circles that the user is part of and all non-private replies. doesn't include anonymous replies because that would expose the user who posted them)
+- If the user is looking for their own replies: an array of all of their replies
 
 **Throws**
 
 - `403` if the user is not logged in
-- `404` if the freetId is invalid
-- `403` if the user is not the author of the freet
-- `400` if the new freet content is empty or a stream of empty spaces
-- `413` if the new freet content is more than 140 characters long
+- `404` if the author id provided doesn't exist
+
+#### `GET /api/replies/:replyId/replies` - Get all the replies to a reply
+
+**Returns** 
+
+- an array of the replies
+
+**Throws**
+
+- `403` if the user is not logged in or if the user is not the a valid viewer for this reply
+- `404` if the reply id is not valid
+
+#### `GET /api/replies/:replyId` - Get a reply from its id
+
+**Returns**
+
+- The reply object
+
+**Throws**
+
+- `403` if the user is not logged in or if the user is not a valid viewer for this reply 
+- `404` if the reply doesn't exist
+
+#### `POST /api/replies/:replyId/replies` - Post a reply to a reply
+
+**Body** 
+
+- `content` _string_ - the reply's content
+- `anonymous` _boolean_ - whether the reply is anonymous
+
+**Returns** 
+
+- The newly created reply 
+
+**Throws** 
+
+- `403` if the user is not logged in or if the user doesn't have access to the parent reply
+- `404` if the reply doesn't exist
+- `400` if the reply content is empty or a stream of empty spaces
+- `413` if the reply content is more than 140 characters
+
+
+#### `PATCH /api/replies/:replyId` - Modify a reply's content
+
+**Body** 
+
+- `content` _string_ - the reply's content
+
+**Returns** 
+
+- The updated reply 
+
+**Throws** 
+
+- `403` if the user is not logged in or if the user is not the author of the reply
+- `404` if the reply doesn't exist
+- `400` if the reply content is empty or a stream of empty spaces
+- `413` if the reply content is more than 140 characters
+
+#### `DELETE /api/replies/:replyId` - Delete a reply
+
+**Returns** 
+
+- A success message
+
+**Throws** 
+
+- `403` if the user is not logged in or if the user is not the author of the reply
+- `404` if the reply doesn't exist
+
+#### `POST /api/replies/:replyId/likes` - Like a reply
+
+**Body**
+- None
+
+**Returns**
+
+- The newly created like
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the reply
+- `404` if the reply doesn't exist
+- `409` if the user has already liked the reply
+
+#### `DELETE /api/replies/:replyId/likes` - Unlike a reply
+
+**Body**
+- None
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the reply
+- `404` if the reply doesn't exist or if the user hasn't already liked the reply
+
+#### `GET /api/replies/:replyId/likes` - Get all the likes for a reply
+
+**Returns**
+
+- An array of the reply likes
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the reply
+- `404` if the reply doesn't exist
+
+#### `GET /api/replies/:replyId/reports` - Get all the reports for a reply
+
+**Returns**
+
+- An array of the reply reports
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the reply
+- `404` if the reply doesn't exist
+
+#### `POST /api/replies/:replyId/reports` - report a reply
+
+**Body**
+- None
+
+**Returns**
+
+- The newly created report
+
+**Throws**
+
+- `403` if the user is not logged in or if the user doesn't have access to the reply
+- `404` if the reply doesn't exist
+- `409` if the user has already reported the reply
 
 #### `POST /api/users/session` - Sign in user
 
@@ -309,212 +652,58 @@ This renders the `index.html` file that will be used to interact with the backen
 **Returns**
 
 - A success message
+- Also deletes all the items the user has created (freets, follows, replies, circles, etc.)
 
 **Throws**
 
 - `403` if the user is not logged in
 
-#### `GET /api/feed/timeline` - Get the timeline feed
-
-**Returns**
-
-- An array of the most recent freets sorted by like count
-
-**Throws**
-
-- `403` if the user is not logged in
-
-#### `GET /api/feed/following` - Get the user's following feed
-
-**Returns**
-
-- An array of the freets posted by users that the current user is following, sorted in descending order by date modified
-
-**Throws**
-
--  `403` if the user is not logged in
-
-#### `POST /api/follows` - Follow a user
+#### `POST /api/users/:username/followers` - follow a user
 
 **Body**
--  `userId` - the id of the user being followed
+- None
 
 **Returns**
+
+- The newly created follow
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the username to follow doesn't exist
+- `409` if the follow already exists
+- `400` if the user is trying to follow themselves
+
+#### `DELETE /api/users/:username/followers` - unfollow a user
+
+**Returns** 
 
 - A success message
 
 **Throws**
 
 - `403` if the user is not logged in
-- `409` if the user already follows the other user
-- `404` if the id of the user being followed doesn't exist
+- `404` if the username to unfollow doesn't exist or if the user isn't already following the username
 
-#### `DELETE /api/follows/:userId?` - Unfollow a user
+#### `GET /api/users/:username/followers` - Get all of a user's followers
 
-**Returns**
+**Returns** 
 
-- A success message
-
-**Throws**
-
-- `403` if the user is not logged in
-- `404` if the id of the user being followed doesn't exist or the follow doesn't exist
-
-#### `GET /api/follows?followee=userId` - Get all the followers of a user
-
-**Returns**
-
-- An array of all the users who follow the given user
+- A array of the follows
 
 **Throws**
 
 - `403` if the user is not logged in
-- `404` if the given id doesn't exist
+- `404` if the username doesn't exist
 
-#### `GET /api/follows?follower=userId` - Get all the users that a user follows
+#### `GET /api/users/:username/following` - Get all the users that a user is following
 
-**Returns**
+**Returns** 
 
-- An array of all the users that the given user follows
-
-**Throws**
-
-- `403` if the user is not logged in
-- `404` if the given id doesn't exist
-
-#### `POST /api/likes` - Like a freet
-
-**Body**
--  `freetId` - the id of the freet being liked
-
-**Returns**
-
-- A success message
+- A array of the follows
 
 **Throws**
 
 - `403` if the user is not logged in
-- `409` if the user has already liked the freet
-- `404` if the id of the freet doesn't exist
+- `404` if the username doesn't exist
 
-#### `DELETE /api/likes` - Unlike a freet
-
-**Body**
--  `freetId` - the id of the freet being unliked
-
-**Returns**
-
-- A success message
-
-**Throws**
-
-- `403` if the user is not logged in
-- `404` if the id of the freet doesn't exist or the user hasn't liked the freet
-
-#### `GET /api/likes?freetId=id` - Get the like count of a freet
-
-**Returns**
-
-- An integer representing the freet's like count
-
-**Throws**
-
-- `403` if the user is not logged in
-- `404` if the freet id doesn't exist
-- `400` if the freet id isn't given
-
-#### `POST /api/reports` - Report a freet
-
-**Body**
--  `freetId` - the id of the freet being reported
-
-**Returns**
-
-- A success message
-
-**Throws**
-
-- `403` if the user is not logged in
-- `409` if the user has already reported the freet
-- `404` if the id of the freet doesn't exist
-
-#### `GET /api/reports?freetId=id` - Get the report count of a freet
-
-**Returns**
-
-- An integer representing the freet's report count
-
-**Throws**
-
-- `403` if the user is not logged in
-- `404` if the freet id doesn't exist
-- `400` if the freet id isn't given
-
-#### `POST /api/circles` - Create a circle
-
-**Body**
--  `name` - the name of the circle
--  `usernames` - the usernames of users in the circle
-
-**Returns**
-
-- An object with the newly created circle
-
-**Throws**
-
-- `403` if the user is not logged in
-- `409` if the user already has a circle with that name
-- `404` if the id of any of the users in the circle doesn't exist
-
-#### `DELETE /api/circles/:circleId` - Delete a circle
-
-**Returns**
-
-- A success message
-
-**Throws**
-
-- `403` if the user is not logged in
-- `404` if the circle doesn't exist
-
-#### `PUT /api/circles` - Update a circle's settings
-
-**Body** _(no need to add fields that are not being changed)_
-
-- `name` _{string}_ - the name of the circle
-- `usernames` _{string}_ - the usernames of users in the circle
-
-**Returns**
-
-- A success message
-- An object with the updated circle details
-
-**Throws**
-
-- `403` if the user is not logged in
-- `409` if the user already has a circle with the new name
-- `404` if the id of any of the users in the circle doesn't exist
-
-#### `GET /api/circles` - Get all of a user's circles
-
-**Returns**
-
-- An array containing the user's circles
-
-**Throws**
-
-- `403` if the user is not logged in
-- `404` if the user id doesn't exist
-- `400` if the user id isn't given
-
-#### `GET /api/circles?circle=circleId` - Get the details for a circle
-
-**Returns**
-
-- An object containing the circle details
-
-**Throws**
-
-- `403` if the user is not logged in
-- `404` if the circle id doesn't exist
-- `400` if the circle id isn't given

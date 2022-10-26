@@ -38,11 +38,14 @@ const router = express.Router();
  * Modify the name or members of the circle.
  * 
  * @name PATCH /api/circles/:id
- * @param {members} - the updated circle members
- * @param {name} - updated circle name
+ * @param {string[]} members - the updated circle members
+ * @param {string} name - updated circle name
  * @returns {CircleResponse} - the updated circle
  * @throws {403} - if the user is not logged in or if the user is not the owner of the circle
  * @throws {404} - if the circle id does not exist
+ * @throws {400} - if a circle member username is invalid or if the circle name is empty
+ * @throws {413} - if the circle name is too long
+ * @throws {409} - if a circle with the updated name already exists
  */
 router.patch(
     '/:circleId?',
@@ -56,7 +59,8 @@ router.patch(
         else next('route'); // editing the members
     },
     [
-        circleValidator.isValidCircleName
+        circleValidator.isValidCircleName,
+        circleValidator.isCircleNotExists
     ],
     async (req: Request, res: Response) => {
         const updatedCircle = await CircleCollection.updateName(req.params.circleId, req.body.name);
@@ -96,7 +100,8 @@ router.patch(
  * @return {CircleResponse} - the newly created circle
  * @throws {403} - if the user is not logged in 
  * @throws {409} - if a circle with the given name already exists
- * @throws {400} - if any of the usernames given for the members don't exist
+ * @throws {400} - if any of the usernames given for the members don't exist or if the circle name is empty
+ * @throws {413} - if the circle name is too long
  */
 router.post(
     '/',

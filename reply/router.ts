@@ -66,6 +66,7 @@ router.get(
     [
       userValidator.isUserLoggedIn,
       replyValidator.isReplyExists,
+      replyValidator.isValidReplyViewer,
     ],
     async (req: Request, res: Response) => {
       const replies = await ReplyCollection.findAllByParentReply(req.params.replyId);
@@ -81,13 +82,14 @@ router.get(
  * 
  * @return {ReplyResponse} - the reply
  * @throws {404} - if the reply id is not valid
- * @throws {403} - if the user is not logged in
+ * @throws {403} - if the user is not logged in or if the user can't access the reply
  */
 router.get(
     "/:replyId?",
     [
         userValidator.isUserLoggedIn,
-        replyValidator.isReplyExists
+        replyValidator.isReplyExists,
+        replyValidator.isValidReplyViewer
     ],
     async (req: Request, res: Response) => {
         const reply = await ReplyCollection.findOneById(req.params.replyId);
@@ -212,6 +214,7 @@ router.post(
     [
         userValidator.isUserLoggedIn,
         replyValidator.isReplyExists,
+        replyValidator.isValidReplyViewer,
         likeValidator.isReplyLikeNotExists
     ],
     async (req: Request, res: Response) => {
@@ -238,6 +241,7 @@ router.delete(
     [
         userValidator.isUserLoggedIn,
         replyValidator.isReplyExists,
+        replyValidator.isValidReplyViewer,
         likeValidator.isReplyLikeExists
     ],
     async (req: Request, res: Response) => {
@@ -262,7 +266,8 @@ router.get(
     '/:replyId?/likes',
     [
         userValidator.isUserLoggedIn,
-        replyValidator.isReplyExists
+        replyValidator.isReplyExists,
+        replyValidator.isValidReplyViewer
     ],
     async (req: Request, res: Response) => {
         const replyLikes = await LikeCollection.findAllByReply(req.params.replyId as string);
@@ -287,7 +292,8 @@ router.get(
     '/:replyId?/reports',
     [
       userValidator.isUserLoggedIn,
-      replyValidator.isReplyExists
+      replyValidator.isReplyExists,
+      replyValidator.isValidReplyViewer,
     ],
     async (req: Request, res: Response) => {
       const replyReports = await ReportCollection.findAllByReply(req.params.replyId as string);
@@ -314,6 +320,7 @@ router.post(
     [
         userValidator.isUserLoggedIn,
         replyValidator.isReplyExists,
+        replyValidator.isValidReplyViewer,
         reportValidator.isReplyReportNotExists
     ],
     async (req: Request, res: Response) => {

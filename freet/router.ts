@@ -22,7 +22,7 @@ import FollowCollection from '../follow/collection';
 const router = express.Router();
 
 /**
- * Get all the freets
+ * Get all the freets visible to the current user
  *
  * @name GET /api/freets
  *
@@ -41,6 +41,9 @@ const router = express.Router();
  */
 router.get(
   '/',
+  [
+    userValidator.isUserLoggedIn
+  ],
   async (req: Request, res: Response, next: NextFunction) => {
     // Check if authorId query parameter was supplied
     if (req.query.author !== undefined) {
@@ -84,6 +87,7 @@ router.get(
  * Get the following feed freets of the current user.
  * 
  * @name GET /api/freets/followingFeed
+ * @throws {403} if the user is not logged in
  */
  router.get(
   '/followingFeed',
@@ -161,7 +165,7 @@ router.post(
 );
 
 /**
- * Modify a freet
+ * Modify a freet's content
  *
  * @name PATCH /api/freets/:id
  *
@@ -229,6 +233,7 @@ router.get(
   [
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
+    freetValidator.isValidFreetViewer
   ],
   async (req: Request, res: Response) => {
     const replies = await ReplyCollection.findAllByParentFreet(req.params.freetId);
